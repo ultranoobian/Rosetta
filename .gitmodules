@@ -1,0 +1,3 @@
+[submodule "Rosetta/PdfiumLight"]
+	path = Rosetta/PdfiumLight
+	url = https://github.com/marcpabst/PdfiumLight.git

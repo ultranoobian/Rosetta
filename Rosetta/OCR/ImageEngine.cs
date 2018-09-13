@@ -14,9 +14,12 @@ using Point = System.Drawing.Point;
 
 namespace OCR
 {
+    /// <summary>
+    /// ImageEngine examines an image using OpenCV and highlights regions of interest
+    /// that may contain tables and table-like formats.
+    /// </summary>
     public class ImageEngine
     {
-
 
         public static int ExtractTables(Image img)
         {
@@ -119,6 +122,7 @@ namespace OCR
             //Cv2.ImShow("joints", joints);
             bit = OCS.Extensions.BitmapConverter.ToBitmap(joints);
             bit.Save("joints.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+            Cv2.ImShow("a", joints);
 
             //Thread.Sleep(2000);
 
@@ -127,6 +131,7 @@ namespace OCR
             //vector<Vec4i> hierarchy;
             //std::vector<std::vector<cv::Point>> contours;
             OCS.HierarchyIndex[] hierarchy;
+            //List<List<OCS.Point>> contours = new List<List<OCS.Point>>;
             OCS.Point[][] contours;
             //cv::findContours(mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
             Cv2.FindContours(mask, out contours, out hierarchy, OCS.RetrievalModes.External, OCS.ContourApproximationModes.ApproxSimple, new OCS.Point(0, 0));
@@ -134,37 +139,46 @@ namespace OCR
             //////vector<vector<Point>> contours_poly(contours.size() );
             //////vector<Rect> boundRect(contours.size() );
             //////vector<Mat> rois;
-            ////ArrayList<ArrayList<OCS.Point>> contours_poly = new ArrayList<ArrayList<OCS.Point>>();
+            List<List<OCS.Point>> contours_poly = new List<List<OCS.Point>>(contours.Length);
+            List<OCS.Rect> boundRect = new List<OCS.Rect>(contours.Length);
+            List<Mat> rois = new List<Mat>();
 
 
             ////for (size_t i = 0; i < contours.size(); i++)
             ////{
             ////    // find the area of each contour
             ////    double area = contourArea(contours[i]);
-
+            ///
             ////    //        // filter individual lines of blobs that might exist and they do not represent a table
             ////    if (area < 100) // value is randomly chosen, you will need to find that by yourself with trial and error procedure
             ////        continue;
-
             ////    approxPolyDP(Mat(contours[i]), contours_poly[i], 3, true);
             ////    boundRect[i] = boundingRect(Mat(contours_poly[i]));
-
             ////    // find the number of joints that each table has
             ////    Mat roi = joints(boundRect[i]);
-
             ////    vector<vector<Point>> joints_contours;
             ////    findContours(roi, joints_contours, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
-
             ////    // if the number is not more than 5 then most likely it not a table
             ////    if (joints_contours.size() <= 4)
             ////        continue;
-
             ////    rois.push_back(rsz(boundRect[i]).clone());
-
-            ////    //        drawContours( rsz, contours, i, Scalar(0, 0, 255), CV_FILLED, 8, vector<Vec4i>(), 0, Point() );
+            ////    //drawContours( rsz, contours, i, Scalar(0, 0, 255), CV_FILLED, 8, vector<Vec4i>(), 0, Point() );
             ////    rectangle(rsz, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 1, 8, 0);
             ////}
 
+            for(int i = 0; i < contours.Length; i++)
+            {
+                double area = Cv2.ContourArea(contours[i]);
+                if (area < 100.0)
+                {
+                    // Skip because its not likely such a small area is a cell
+                    continue;
+                }
+                OutputArray ou = OutputArray.Create(contours_poly[i]);
+                Cv2.ApproxPolyDP(InputArray.Create(contours[i]), ou, 3.0, true);
+                boundRect[i] = Cv2.BoundingRect(InputArray.Create(contours_poly[i]));
+                //OCS.Mat roi = Cv2.joints()
+            }
             ////for (size_t i = 0; i < rois.size(); ++i)
             ////{
             ////    /* Now you can do whatever post process you want

@@ -16,86 +16,112 @@ namespace OCR_Test
         [TestMethod]
         public void InitializationTest_NoErrors()
         {
-            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/testPDF.pdf");
+            OCR.PDFiumEngine pdfEngine;
+            pdfEngine = new PDFiumEngine("Test Resources/EX-01.pdf");
+            pdfEngine = new PDFiumEngine("Test Resources/EX-02.pdf");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentNullException))]
+        [ExpectedException(typeof(System.IO.FileNotFoundException))]
         public void InitializationTest_ExceptException()
         {
             OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/testPDF_nonexistent.pdf");
-            
+
         }
 
         [TestMethod]
         public void PageCountTest()
         {
-            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/testPDF.pdf");
-            //Interesting format....
-            //Assert.AreEqual(expected: 3, actual: pdfEngine.Count());
+            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/EX-01.pdf");
             Assert.AreEqual(3, pdfEngine.PageCount);
         }
 
         [TestMethod]
-        public void RenderTest()
+        public void PageCountTest_2()
         {
-            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/testPDF.pdf");
-            var img = pdfEngine.GetImageFromPageNumber(0);
-            Bitmap bit = new Bitmap(img);
-            bit.Save("a.jpg", ImageFormat.Jpeg);
-                        
+            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/EX-02.pdf");
+            Assert.AreEqual(11, pdfEngine.PageCount);
         }
 
         [TestMethod]
-        public void Render2Test()
+        public void RenderTest_default()
         {
-            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/testPDF.pdf");
-            var img = pdfEngine.GetImageFromPageNumber(0, 8000,0);
-            Bitmap bit = new Bitmap(img);
-            bit.Save("b.jpg", ImageFormat.Jpeg);
-            bit.Dispose();
+            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/EX-01.pdf");
+            using (Image img = pdfEngine.GetImageFromPageNumber(0))
+            {
+                Assert.AreEqual(500, img.Height);
+            }
+        }
+
+        [TestMethod]
+        public void RenderTest_8000_width()
+        {
+            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/EX-02.pdf");
+            using (Image img = pdfEngine.GetImageFromPageNumber(0, 8000, 0))
+            {
+                Assert.AreEqual(8000, img.Width);
+            }
 
         }
 
 
         [TestMethod]
-        public void Render3Test()
+        public void RenderTest_4000_width()
         {
-            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/testPDF.pdf");
-            var img = pdfEngine.GetImageFromPageNumber(0, 8000, 0);
-            Bitmap bit = new Bitmap(img);
-            bit.Save("c.bmp", ImageFormat.Bmp);
-            bit.Dispose();
-
-        }
-
-        [TestMethod]
-        public void Render4Test()
-        {
-            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/testPDF3.pdf");
-            //List<Image> images = new List<Image>();
-            //for(int i = 0; i < pdfEngine.PageCount; i++)
-            //{
-            //    images.Add(pdfEngine.GetImageFromPageNumber(i, 8000, 0));
-            //}
-            
-            Bitmap bit = new Bitmap(pdfEngine.GetImageFromPageNumber(0, 8000, 0));
-            bit.Save("c.jpg", ImageFormat.Jpeg);
-            bit.Dispose();
+            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/EX-01.pdf");
+            using (Image img = pdfEngine.GetImageFromPageNumber(0, 4000, 0))
+            {
+                Assert.AreEqual(4000, img.Width);
+            }
 
         }
 
         [TestMethod]
-        public void Render5Test()
+        public void RenderTest_8000_width_2()
         {
-            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/testPDF4.pdf");
-
-            Bitmap bit = new Bitmap(pdfEngine.GetImageFromPageNumber(0, 3000, 0));
-            bit.Save("c.jpg", ImageFormat.Jpeg);
-            bit.Dispose();
+            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/EX-01.pdf");
+            using (Image img = pdfEngine.GetImageFromPageNumber(0, 8000, 0))
+            {
+                Assert.AreEqual(8000, img.Width);
+            }
 
         }
 
+
+        [TestMethod]
+        public void RenderTest_4000_width_2()
+        {
+            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/EX-02.pdf");
+            using (Image img = pdfEngine.GetImageFromPageNumber(0, 4000, 0))
+            {
+                Assert.AreEqual(4000, img.Width);
+            }
+
+        }
+
+        [TestMethod]
+        public void RenderTest_4000_width_4000_height()
+        {
+            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/EX-01.pdf");
+            using (Image img = pdfEngine.GetImageFromPageNumber(0, 4000, 4000))
+            {
+                Assert.AreEqual(4000, img.Width);
+                Assert.AreEqual(4000, img.Height);
+            }
+
+        }
+
+        [TestMethod]
+        public void RenderTest_4000_width_4000_height_2()
+        {
+            OCR.PDFiumEngine pdfEngine = new PDFiumEngine("Test Resources/EX-02.pdf");
+            using (Image img = pdfEngine.GetImageFromPageNumber(0, 4000, 4000))
+            {
+                Assert.AreEqual(4000, img.Width);
+                Assert.AreEqual(4000, img.Height);
+            }
+
+        }
     }
 }
 

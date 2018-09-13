@@ -5,7 +5,7 @@ using System.Drawing;
 
 namespace OCR
 {
-    public class PDFiumEngine
+    public class PDFiumEngine : IDisposable
     {
         PdfDocument doc;
         public readonly int PageCount = 0;
@@ -80,5 +80,13 @@ namespace OCR
             return pages[page].Render(x, y);
         }
 
+        public void Dispose()
+        {
+            foreach(PdfPage p in pages)
+            {
+                p.Dispose();
+            }
+            doc.Dispose();
+        }
     }
 }

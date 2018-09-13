@@ -35,7 +35,7 @@ namespace OCR
         }
     }
 
-    public static class Utiltiy
+    public static class Utility
     {
         public static String Consume(String path)
         {

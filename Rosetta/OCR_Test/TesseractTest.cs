@@ -12,5 +12,11 @@ namespace OCR_Test
         {
             OCR.Utility.Consume("Test Resources/EX-01.pdf");
         }
+
+        [TestMethod]
+        public void TestConsume_image()
+        {
+            OCR.Utility.Consume_Image("Test Resources/EX3.png");
+        }
     }
 }

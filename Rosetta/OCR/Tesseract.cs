@@ -55,7 +55,7 @@ namespace OCR
                         Bitmap bit = new Bitmap(img);
                         using (Page p = engine.Process(bit, PageSegMode.AutoOsd))
                         {
-                            string text = p.GetHOCRText(0);
+                            string text = p.GetText();
                             sw.WriteLine(text);
                             sw.Flush();
                         }
@@ -66,5 +66,27 @@ namespace OCR
 
             return "";
         }
+
+        public static String Consume_Image(String path)
+        {
+            using (StreamWriter sw = new StreamWriter(String.Format("output_{0}.txt", Path.GetFileNameWithoutExtension(path), false)))
+            {
+                using (TesseractEngine engine = Tesseract.getInstance())
+                {
+                    Bitmap bit = new Bitmap(path);
+                    using (Page p = engine.Process(bit, PageSegMode.AutoOsd))
+                    {
+                        string text = p.GetText();
+                        sw.WriteLine(text);
+                        sw.Flush();
+                    }
+                }
+
+                sw.Close();
+            }
+            return "";
+        }
     }
+
 }
+

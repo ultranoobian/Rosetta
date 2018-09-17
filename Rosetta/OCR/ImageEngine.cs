@@ -14,9 +14,12 @@ using Point = System.Drawing.Point;
 
 namespace OCR
 {
+    /// <summary>
+    /// ImageEngine examines an image using OpenCV and highlights regions of interest
+    /// that may contain tables and table-like formats.
+    /// </summary>
     public class ImageEngine
     {
-
 
         public static int ExtractTables(Image img)
         {
@@ -41,20 +44,18 @@ namespace OCR
             // Convert to greyscale if it has more than one channel
             // else just leave it alone
             Mat grey = new Mat();
-            if (rsz.Channels() == 3)
-            {
-                Cv2.CvtColor(rsz, grey, ColorConversionCodes.BGR2GRAY);
-            }
-            else
-            {
-                grey = rsz;
-            }
+            Cv2.CvtColor(rsz, grey, ColorConversionCodes.BGR2GRAY);
+
+#if IMG_DEBUG
+            Cv2.ImShow("grey", grey);
+            Cv2.WaitKey(0);
+#endif
 
             //Apply adaptive thresholding to get negative
             Mat bw = new Mat();
             Cv2.AdaptiveThreshold(~grey, bw, 255, AdaptiveThresholdTypes.MeanC, ThresholdTypes.Binary, 15, -2);
             bit = OCS.Extensions.BitmapConverter.ToBitmap(bw);
-            bit.Save("bw.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+            bit.Save("bw.tiff", System.Drawing.Imaging.ImageFormat.Tiff);
 
             // Create two new masks cloned from bw.
 
@@ -84,9 +85,12 @@ namespace OCR
             //    dilate(horizontal, horizontal, horizontalStructure, Point(-1, -1)); // expand horizontal lines
 
             // Show extracted horizontal lines
+#if IMG_DEBUG
             Cv2.ImShow("horizontal", horizontal);
+            Cv2.WaitKey(0);
+#endif
             bit = OCS.Extensions.BitmapConverter.ToBitmap(horizontal);
-            bit.Save("horizontal.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+            bit.Save("horizontal.tiff", System.Drawing.Imaging.ImageFormat.Tiff);
 
             // Specify size on vertical axis
             int verticalsize = vertical.Rows / scale;
@@ -102,14 +106,20 @@ namespace OCR
             Cv2.Dilate(vertical, vertical, verticalStructure, new OCS.Point(-1, -1));
 
             // Show extracted vertical lines
+#if IMG_DEBUG
             Cv2.ImShow("vertical", vertical);
+            Cv2.WaitKey(0);
+#endif
             bit = OCS.Extensions.BitmapConverter.ToBitmap(vertical);
-            bit.Save("vertical.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+            bit.Save("vertical.tiff", System.Drawing.Imaging.ImageFormat.Tiff);
 
 
             // create a mask which includes the tables
             Mat mask = horizontal + vertical;
+#if IMG_DEBUG
             Cv2.ImShow("mask", mask);
+            Cv2.WaitKey(0);
+#endif
 
             // find the joints between the lines of the tables, we will use this information in order to descriminate tables from pictures (tables will contain more than 4 joints while a picture only 4 (i.e. at the corners))
             Mat joints = new Mat();
@@ -118,7 +128,11 @@ namespace OCR
 
             //Cv2.ImShow("joints", joints);
             bit = OCS.Extensions.BitmapConverter.ToBitmap(joints);
-            bit.Save("joints.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+            bit.Save("joints.tiff", System.Drawing.Imaging.ImageFormat.Tiff);
+#if IMG_DEBUG
+            Cv2.ImShow("a", joints);
+            Cv2.WaitKey(0);
+#endif
 
             //Thread.Sleep(2000);
 
@@ -127,6 +141,7 @@ namespace OCR
             //vector<Vec4i> hierarchy;
             //std::vector<std::vector<cv::Point>> contours;
             OCS.HierarchyIndex[] hierarchy;
+            //List<List<OCS.Point>> contours = new List<List<OCS.Point>>;
             OCS.Point[][] contours;
             //cv::findContours(mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
             Cv2.FindContours(mask, out contours, out hierarchy, OCS.RetrievalModes.External, OCS.ContourApproximationModes.ApproxSimple, new OCS.Point(0, 0));
@@ -134,37 +149,59 @@ namespace OCR
             //////vector<vector<Point>> contours_poly(contours.size() );
             //////vector<Rect> boundRect(contours.size() );
             //////vector<Mat> rois;
-            ////ArrayList<ArrayList<OCS.Point>> contours_poly = new ArrayList<ArrayList<OCS.Point>>();
-
+            List<List<OCS.Point>> contours_poly = new List<List<OCS.Point>>(contours.Length);
+            List<OCS.Rect> boundRect = new List<OCS.Rect>(contours.Length);
+            List<Mat> rois = new List<Mat>();
+             
 
             ////for (size_t i = 0; i < contours.size(); i++)
             ////{
             ////    // find the area of each contour
             ////    double area = contourArea(contours[i]);
-
+            ///
             ////    //        // filter individual lines of blobs that might exist and they do not represent a table
             ////    if (area < 100) // value is randomly chosen, you will need to find that by yourself with trial and error procedure
             ////        continue;
-
             ////    approxPolyDP(Mat(contours[i]), contours_poly[i], 3, true);
             ////    boundRect[i] = boundingRect(Mat(contours_poly[i]));
-
             ////    // find the number of joints that each table has
             ////    Mat roi = joints(boundRect[i]);
-
             ////    vector<vector<Point>> joints_contours;
             ////    findContours(roi, joints_contours, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
-
             ////    // if the number is not more than 5 then most likely it not a table
             ////    if (joints_contours.size() <= 4)
             ////        continue;
-
             ////    rois.push_back(rsz(boundRect[i]).clone());
-
-            ////    //        drawContours( rsz, contours, i, Scalar(0, 0, 255), CV_FILLED, 8, vector<Vec4i>(), 0, Point() );
+            ////    //drawContours( rsz, contours, i, Scalar(0, 0, 255), CV_FILLED, 8, vector<Vec4i>(), 0, Point() );
             ////    rectangle(rsz, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 1, 8, 0);
             ////}
 
+            for(int i = 0; i < contours.Length; i++)
+            {
+                double area = Cv2.ContourArea(contours[i]);
+                if (area < 100.0)
+                {
+                    // Skip because its not likely such a small area is a cell
+                    continue;
+                }
+                // contours_poly is null at runtime. so we create a new entry and exit array
+                contours_poly.Add(new List<OCS.Point>());
+                OutputArray contour_poly_output = OutputArray.Create(contours_poly[i]);
+
+                InputArray contour_poly_input = InputArray.Create(contours[i]);
+                Cv2.ApproxPolyDP(InputArray.Create(contours[i]), contour_poly_output, 0.0, true);
+                Rect boundingRect = Cv2.BoundingRect(InputArray.Create(contours_poly[i]));
+                boundRect.Add(boundingRect);
+                //boundRect[i] = Cv2.BoundingRect(InputArray.Create(contours_poly[i]));
+                //OCS.Mat roi = Cv2.joints()
+            }
+#if IMG_DEBUG
+            Cv2.NamedWindow("Output", WindowMode.KeepRatio);
+            Cv2.Rectangle(rsz, boundRect.ElementAt(0), Scalar.Red, 10);
+            Cv2.ImShow("Output", rsz);
+            Cv2.WaitKey(0);
+            Cv2.DestroyAllWindows();
+#endif
             ////for (size_t i = 0; i < rois.size(); ++i)
             ////{
             ////    /* Now you can do whatever post process you want
@@ -173,21 +210,7 @@ namespace OCR
             ////    waitKey();
             ////}
 
-
-
-
-            return AreasOfInterest.Count;
+            return boundRect.Count;
         }
-    }
-
-
-
-
-    struct Rectangle
-    {
-        Point x1;
-        Point y1;
-        Point width;
-        Point height;
     }
 }

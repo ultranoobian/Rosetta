@@ -9,21 +9,18 @@ namespace OCR_Test
     public class ImageEngineTest
     {
         [TestMethod]
-        public void TestMethod1()
+        public void BasicTable_Test()
         {
-            //using(Stream imageStream)
-            //System.Drawing.Bitmap testImage = new System.Drawing.Bitmap("testImage.jpg");
-            ImageEngine ie = new ImageEngine();
-            PrivateObject privateImageEngine = new PrivateObject(ie);
-
-            //var returnValue = privateImageEngine.Invoke("ExtractTables", testImage);
+            Image testImage = Bitmap.FromFile("Test Resources/EX-01-8000w.png");
+            Assert.AreEqual(1, ImageEngine.ExtractTables(testImage));
         }
 
         [TestMethod]
-        public void TestMethod2()
+        public void BasicTable_Test2()
         {
-            Image testImage = Bitmap.FromFile("c.bmp");
-            ImageEngine.ExtractTables(testImage);
+            Image testImage = Bitmap.FromFile("Test Resources/EX-02-8000w.png");
+            Assert.AreEqual(1, ImageEngine.ExtractTables(testImage));
         }
+
     }
 }

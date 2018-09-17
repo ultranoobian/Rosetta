@@ -54,6 +54,7 @@
     <Compile Include="PDFiumTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TesseractTest.cs" />
+    <Compile Include="WebScrapperTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

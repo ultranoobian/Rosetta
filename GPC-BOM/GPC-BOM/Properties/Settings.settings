@@ -1,0 +1,98 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="GPC_BOM.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="cLevel" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;level&lt;/string&gt;
+  &lt;string&gt;lvl&lt;/string&gt;
+  &lt;string&gt;lv&lt;/string&gt;
+  &lt;string&gt;lv.&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="cCPN" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;cpn&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="cDescription" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;description&lt;/string&gt;
+  &lt;string&gt;item description&lt;/string&gt;
+  &lt;string&gt;material description&lt;/string&gt;
+  &lt;string&gt;general description&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="cQuantity" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;quantity&lt;/string&gt;
+  &lt;string&gt;qty&lt;/string&gt;
+  &lt;string&gt;qty/assy&lt;/string&gt;
+  &lt;string&gt;qty per assy&lt;/string&gt;
+  &lt;string&gt;e-bom quantity&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="cDesignator" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;designator&lt;/string&gt;
+  &lt;string&gt;designation&lt;/string&gt;
+  &lt;string&gt;ref des&lt;/string&gt;
+  &lt;string&gt;reference des&lt;/string&gt;
+  &lt;string&gt;reference position / notes&lt;/string&gt;
+  &lt;string&gt;ref&lt;/string&gt;
+  &lt;string&gt;ref designators&lt;/string&gt;
+  &lt;string&gt;part-refs&lt;/string&gt;
+  &lt;string&gt;location no.&lt;/string&gt;
+  &lt;string&gt;circuit code(ee)&lt;/string&gt;
+  &lt;string&gt;location&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="cManufacturer" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;manufacturer&lt;/string&gt;
+  &lt;string&gt;mfgr.name&lt;/string&gt;
+  &lt;string&gt;20-primary manuf&lt;/string&gt;
+  &lt;string&gt;maker&lt;/string&gt;
+  &lt;string&gt;vendor&lt;/string&gt;
+  &lt;string&gt;mfr  pns&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="cMPN" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;part number&lt;/string&gt;
+  &lt;string&gt;mfgr.nbr&lt;/string&gt;
+  &lt;string&gt;manufacturer part #&lt;/string&gt;
+  &lt;string&gt;manufacturer p/n&lt;/string&gt;
+  &lt;string&gt;manufacturers part number&lt;/string&gt;
+  &lt;string&gt;21-primary manuf pn&lt;/string&gt;
+  &lt;string&gt;p/n&lt;/string&gt;
+  &lt;string&gt;parts no.&lt;/string&gt;
+  &lt;string&gt;component p/n&lt;/string&gt;
+  &lt;string&gt;mpn&lt;/string&gt;
+  &lt;string&gt;21-primary manuf pn&lt;/string&gt;
+  &lt;string&gt;21 - primary manuf pn&lt;/string&gt;
+  &lt;string&gt;mfg part&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="cProcess" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;process&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="cNotes" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;notes&lt;/string&gt;
+  &lt;string&gt;bom notes&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

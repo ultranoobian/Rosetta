@@ -2,15 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections;
-using System.Diagnostics;
-using System.Threading;
 using OCS = OpenCvSharp;
 using Cv2 = OpenCvSharp.Cv2;
-using Point = System.Drawing.Point;
 
 namespace OCR
 {

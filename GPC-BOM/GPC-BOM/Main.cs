@@ -44,6 +44,7 @@ namespace GPC_BOM {
                     queueSize = queueSize + 1;
                 }
             }
+            this.lblDragDrop.Hide();
             statusUpdate(String.Format("{0} files added to queue", queueSize));
         }
         private void msiExit_Click(object sender, EventArgs e) {
@@ -159,6 +160,8 @@ namespace GPC_BOM {
                 lvFiles.Items.Add(lvi);
                 queueSize = queueSize + 1;
             }
+            // Hide the drag and drop label now
+            this.lblDragDrop.Hide();
             statusUpdate(String.Format("{0} files added to queue", queueSize));
         }
 
@@ -167,6 +170,9 @@ namespace GPC_BOM {
             // The multi-select property can be toggled via the designer
             if (lvFiles.SelectedItems.Count != 0) {
                 lvFiles.SelectedItems[0].Remove();
+                if (lvFiles.Items.Count == 0) {
+                    this.lblDragDrop.Show();
+                }
             }
             else {
                 Debug.Print("Nothing was selected...");
@@ -176,6 +182,7 @@ namespace GPC_BOM {
         private void btnClearQueue_Click(object sender, EventArgs e) {
             // Removes all items from the list view
             lvFiles.Items.Clear();
+            this.lblDragDrop.Show();
         }
 
         private void btnPreview_Click(object sender, EventArgs e) {

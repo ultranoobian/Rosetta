@@ -43,8 +43,8 @@ namespace GPC_BOM {
                     }
                     queueSize = queueSize + 1;
                 }
+                this.lblDragDrop.Hide();
             }
-            this.lblDragDrop.Hide();
             statusUpdate(String.Format("{0} files added to queue", queueSize));
         }
         private void msiExit_Click(object sender, EventArgs e) {
@@ -59,6 +59,8 @@ namespace GPC_BOM {
         private void msiDocumentation_Click(object sender, EventArgs e) {
             // TODO: include help file in resources
             MessageBox.Show("Not implemented yet!");
+            var PDFEx = new PDFExtraction();
+            PDFEx.convertPDFToWord(this, "test1", "test2");
         }
         private void msiAbout_Click(object sender, EventArgs e) {
             AboutBox about = new AboutBox();
@@ -241,7 +243,7 @@ namespace GPC_BOM {
                     // It's a Word document - convert to Excel first
                     var wordEx = new WordExtraction();
                     string inFile = item.SubItems[2].Text;
-                    string outFile = this.tbPath.Text + item.SubItems[0].Text + "_extract.xls";
+                    string outFile = this.tbPath.Text + "\\" + item.SubItems[0].Text + "_extract.xls";
                     wordEx.convertWordToExcel(this, inFile, outFile);
                     wordEx = null;
                     // Reset progress bar for file
@@ -250,7 +252,7 @@ namespace GPC_BOM {
                     statusUpdate(String.Format("Processing file: {0}", item.SubItems[0].Text + "_extract.xls"));
                     var excelConvert = new ExcelConversion();
                     string inFile2 = outFile;
-                    string outFile2 = this.tbPath.Text + item.SubItems[0].Text + "_" + conversionFormat;
+                    string outFile2 = this.tbPath.Text + "\\" + item.SubItems[0].Text + "_" + conversionFormat;
                     if (conversionFormat.Equals("sap")) {
                         outFile2 = outFile2 + ".xls";
                     }
@@ -293,7 +295,7 @@ namespace GPC_BOM {
                     // It's a native Excel spreadsheet
                     var excelConvert = new ExcelConversion();
                     string inFile = item.SubItems[2].Text;
-                    string outFile = this.tbPath.Text + item.SubItems[0].Text + "_" + conversionFormat;
+                    string outFile = this.tbPath.Text + "\\" + item.SubItems[0].Text + "_" + conversionFormat;
                     if (conversionFormat.Equals("sap")) {
                         outFile = outFile + ".xls";
                     }

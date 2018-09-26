@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
@@ -111,6 +112,7 @@ namespace GPC_BOM {
                 oExcel.Visible = false;
                 oExcel.DisplayAlerts = false;
                 if (oExcel == null) {
+                    MessageBox.Show("Excel could not be started. Please check that it is installed correctly and allows automation.");
                     Debug.WriteLine("Excel could not be started. Check that compiled app reference matches Office version installed.");
                     return;
                 }

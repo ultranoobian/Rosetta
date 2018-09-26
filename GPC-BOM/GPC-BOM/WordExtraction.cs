@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -30,6 +31,7 @@ namespace GPC_BOM {
                 oWord.Visible = false;
                 oWord.DisplayAlerts = Word.WdAlertLevel.wdAlertsNone;
                 if (oWord == null) {
+                    MessageBox.Show("Word could not be started. Please check that it is installed correctly and allows automation.");
                     Debug.WriteLine("Word could not be started. Check that compiled app reference matches Office version installed.");
                     return;
                 }
@@ -57,6 +59,7 @@ namespace GPC_BOM {
                 //oExcel.CreateNewFile();
                 //oExcel.SaveAs(inputPath);
                 if (oWorksheet == null) {
+                    MessageBox.Show("Excel could not be started. Please check that it is installed correctly and allows automation.");
                     Debug.WriteLine("Problem creating worksheet or opening Excel. Check that compiled app reference matches Office version installed.");
                     return;
                 }

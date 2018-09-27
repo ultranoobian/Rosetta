@@ -1,8 +1,0 @@
-C:\Users\Brenton\documents\visual studio 2010\Projects\BOM\BOM\obj\x86\Debug\BOM.Tester.resources
-C:\Users\Brenton\documents\visual studio 2010\Projects\BOM\BOM\obj\x86\Debug\BOM.Properties.Resources.resources
-C:\Users\Brenton\documents\visual studio 2010\Projects\BOM\BOM\obj\x86\Debug\BOM.csproj.GenerateResource.Cache
-C:\Users\Brenton\documents\visual studio 2010\Projects\BOM\BOM\bin\Debug\BOM.exe
-C:\Users\Brenton\documents\visual studio 2010\Projects\BOM\BOM\bin\Debug\BOM.pdb
-C:\Users\Brenton\documents\visual studio 2010\Projects\BOM\BOM\obj\x86\Debug\BOM.exe
-C:\Users\Brenton\documents\visual studio 2010\Projects\BOM\BOM\obj\x86\Debug\BOM.pdb
-C:\Users\Brenton\documents\visual studio 2010\Projects\BOM\BOM\obj\x86\Debug\BOM.csprojResolveAssemblyReference.cache

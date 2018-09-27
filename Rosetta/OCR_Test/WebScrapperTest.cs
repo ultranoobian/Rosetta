@@ -12,6 +12,12 @@ namespace OCR.Tests
         {
             Assert.AreEqual("Crystals +/-20ppm 12MHZ", WebScrapper.MouserAPI_GetDescription("ABM3B-12.000MHZ-B2-T"));
         }
+
+        [TestMethod()]
+        public void Element14API_GetDescriptionTest()
+        {
+            Assert.AreEqual("ABRACON - ABM3B-12.000MHZ-B2-T - CRYSTAL, 12MHZ, 18PF, 5 X 3.2MM", WebScrapper.Element14API_GetDescription("ABM3B-12.000MHZ-B2-T"));
+        }
     }
 }
 

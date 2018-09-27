@@ -1,6 +1,8 @@
 using System.Windows.Forms;
 using System.Net;
 using System;
+using System.Net.Http;
+using System.Xml;
 
 namespace OCR
 {
@@ -243,6 +245,40 @@ namespace OCR
             }
 
             return "";
+        }
+
+        public static string Element14API_GetDescription(string keyword)
+        {
+            //Construct our URI with our parameters
+            UriBuilder uriBuilder = new UriBuilder("https://api.element14.com/catalog/products");
+            string[] apiParams = new string[] {
+                "callInfo.responseDataFormat=XML",
+                "callInfo.omitXmlSchema",
+                "term=manuPartNum:"+keyword+"",
+                "storeInfo.id=au.element14.com",
+                "callInfo.apiKey=[REDACTED]",
+            };
+
+            uriBuilder.Query = String.Join("&", apiParams);
+
+            // Use HttpClient to access our prebuilt URI
+            HttpClient hc = new HttpClient();
+            hc.BaseAddress = uriBuilder.Uri;
+            string v = hc.GetStringAsync("").Result;
+
+            // Load HTTP Response into XML Document Object
+            XmlDocument xDoc = new XmlDocument();
+            xDoc.LoadXml(v);
+
+            // Test number of products in XML Document, return the first item description, otherwise nothing.
+            int count = int.Parse(xDoc.GetElementsByTagName("ns1:numberOfResults")[0].InnerText);
+            if(count > 0)
+            {
+                return xDoc.GetElementsByTagName("ns1:displayName")[0].InnerText;
+            } else
+            {
+                return "";
+            }         
         }
     }
 }

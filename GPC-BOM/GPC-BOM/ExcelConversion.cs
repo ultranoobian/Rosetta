@@ -108,6 +108,7 @@ namespace GPC_BOM {
 
             try {
                 // Start Excel
+                mainApp.statusUpdate2("(Starting Excel)");
                 oExcel = new Excel.Application();
                 oExcel.Visible = false;
                 oExcel.DisplayAlerts = false;
@@ -121,14 +122,17 @@ namespace GPC_BOM {
                 }
 
                 // Open Excel spreadsheet
+                mainApp.statusUpdate2("(Opening Excel document)");
                 oWorkbook = oExcel.Workbooks.Open(excelFile);
                 // This sets the variable as the active sheet - this may need to change if iterating through multiple sheets
+                // Heuristics!!!
                 oWorksheet = oWorkbook.ActiveSheet;
                 Debug.WriteLine("Processing file...");
                 mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
                 #region Find column headers
 
+                mainApp.statusUpdate2("(Searching for column headers)");
                 Excel.Range searchRange = oExcel.get_Range(headerRow.ToString() + ":" + headerRow.ToString(), Type.Missing);
 
                 // Find Level
@@ -235,7 +239,8 @@ namespace GPC_BOM {
                 mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
                 #region Extract column data
-                
+
+                mainApp.statusUpdate2("(Extracting data from original file)");
                 // Get Level
                 System.Array levelData = null;
                 if (level_column == (int?)null || level_row == (int?)null) {
@@ -349,6 +354,7 @@ namespace GPC_BOM {
                 mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
                 // Copy template from resources
+                mainApp.statusUpdate2("(Creating and opening output file)");
                 if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
                     File.WriteAllBytes(@outFile, Properties.Resources.Quotewin);
                 }
@@ -362,6 +368,7 @@ namespace GPC_BOM {
 
                 #region Write data to output file
 
+                mainApp.statusUpdate2("(Writing data to output file)");
                 // Write Level column
                 if (levelData != null) {
                     int rowCount = levelData.GetLength(0);
@@ -602,13 +609,96 @@ namespace GPC_BOM {
 
                 #endregion
 
-                Debug.WriteLine("Data copied. Attempting to save file...");
+                Debug.WriteLine("Data copied.");
                 mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
+                #region Web Scraping
+
+                mainApp.statusUpdate2("(Checking for missing fields and searching the web)");
+                // At the time of writing, only missing descriptions can be retrieved
+                // MPN is usually the only unique identifier that can be searched
+                if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
+                    // Iterate through every row of the sheet
+                    for (int i = 2; i <= oWorksheet2.UsedRange.Rows.Count; i++) {
+                        // Check if description is filled or not
+                        string descriptionValue = Convert.ToString(oWorksheet2.Cells[i, description_quotewin_column].Value2);
+                        if (string.IsNullOrEmpty(descriptionValue) || string.IsNullOrWhiteSpace(descriptionValue)) {
+                            // Check if MPN is available
+                            string mpnValue = Convert.ToString(oWorksheet2.Cells[i, mpn_quotewin_column].Value2);
+                            if (string.IsNullOrEmpty(mpnValue) || string.IsNullOrWhiteSpace(mpnValue)) {
+                                // Can't do anything if MPN is missing as well
+                                writeCell(oWorksheet2, i, description_quotewin_column, dataMissingMessage);
+                                writeCell(oWorksheet2, i, mpn_quotewin_column, dataMissingMessage);
+                                continue;
+                            }
+                            else {
+                                // Web scraping time!
+                                string result = tryWebScrape(mpnValue);
+                                if (string.IsNullOrEmpty(result) || string.IsNullOrWhiteSpace(result)) {
+                                    // Couldn't find anything via web search
+                                    writeCell(oWorksheet2, i, description_quotewin_column, dataMissingMessage);
+                                    continue;
+                                }
+                                else {
+                                    // Write data to cell
+                                    writeCell(oWorksheet2, i, description_quotewin_column, result);
+                                }
+                            }
+                        }
+                        else {
+                            // Next loop if cell is already filled
+                            continue;
+                        }
+                    }
+                }
+                else if (fileType.Equals("sap")) {
+                    // Iterate through every row of the sheet
+                    for (int i = 5; i <= oWorksheet2.UsedRange.Rows.Count; i++) {
+                        // Check if description is filled or not
+                        string descriptionValue = Convert.ToString(oWorksheet2.Cells[i, description_sap_column].Value2);
+                        if (string.IsNullOrEmpty(descriptionValue) || string.IsNullOrWhiteSpace(descriptionValue)) {
+                            // Check if MPN is available
+                            string mpnValue = Convert.ToString(oWorksheet2.Cells[i, mpn_sap_column].Value2);
+                            if (string.IsNullOrEmpty(mpnValue) || string.IsNullOrWhiteSpace(mpnValue)) {
+                                // Can't do anything if MPN is missing as well
+                                writeCell(oWorksheet2, i, description_sap_column, dataMissingMessage);
+                                highlightCell(oWorksheet2, i, description_sap_column, Excel.XlRgbColor.rgbYellow);
+                                writeCell(oWorksheet2, i, mpn_sap_column, dataMissingMessage);
+                                highlightCell(oWorksheet2, i, mpn_sap_column, Excel.XlRgbColor.rgbYellow);
+                                continue;
+                            }
+                            else {
+                                // Web scraping time!
+                                string result = tryWebScrape(mpnValue);
+                                if (string.IsNullOrEmpty(result) || string.IsNullOrWhiteSpace(result)) {
+                                    // Couldn't find anything via web search
+                                    writeCell(oWorksheet2, i, description_sap_column, dataMissingMessage);
+                                    highlightCell(oWorksheet2, i, description_sap_column, Excel.XlRgbColor.rgbYellow);
+                                    continue;
+                                }
+                                else {
+                                    // Write data to cell and use different highlight colour
+                                    writeCell(oWorksheet2, i, description_sap_column, result);
+                                    highlightCell(oWorksheet2, i, description_sap_column, Excel.XlRgbColor.rgbAqua);
+                                }
+                            }
+                        }
+                        else {
+                            // Next loop if cell is already filled
+                            continue;
+                        }
+                    }
+                }
+
+                #endregion
+
+                Debug.WriteLine("Attempting to save file.");
+                mainApp.statusUpdate2("(Saving the output file)");
+                mainApp.pbUpdate(20, frmMain.pbModeIncrement);
                 // Save the Excel workbook (should probably be careful about overwriting stuff if it exists)
                 if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
                     // Save as Windows CSV file
-                    oWorkbook2.SaveAs(outFile, Excel.XlFileFormat.xlCSVWindows, Type.Missing, Type.Missing, false, false, Excel.XlSaveAsAccessMode.xlNoChange, Excel.XlSaveConflictResolution.xlLocalSessionChanges, Type.Missing, Type.Missing);
+                    oWorkbook2.SaveAs(outFile, Excel.XlFileFormat.xlCSV, Type.Missing, Type.Missing, false, false, Excel.XlSaveAsAccessMode.xlNoChange, Excel.XlSaveConflictResolution.xlLocalSessionChanges, Type.Missing, Type.Missing);
                 }
                 else if (fileType.Equals("sap")) {
                     // Save as Excel 97-2003 .xls file for backwards compatibility
@@ -618,7 +708,7 @@ namespace GPC_BOM {
                 // Clean up and close apps
                 // TODO: Need to test if this also closes user's other windows!!!
                 Debug.WriteLine("Cleaning up...");
-                mainApp.pbUpdate(20, frmMain.pbModeIncrement);
+                mainApp.statusUpdate2("(Closing Excel)");
                 oExcel.Workbooks.Close();
                 oExcel.Quit();
             }
@@ -656,6 +746,26 @@ namespace GPC_BOM {
 
         private void highlightCell(Excel.Worksheet oWorksheet, int row, int column, Excel.XlRgbColor colourValue) {
             oWorksheet.Cells[row, column].Interior.Color = colourValue;
+        }
+
+        private string tryWebScrape(string searchTerm) {
+            // Blank string as default
+            string result = "";
+                // Try DigiKey first
+                result = Webscraper.NaiveDigikey(searchTerm);
+                if (string.IsNullOrEmpty(result)) {
+                    // Try Element14 second
+                    result = Webscraper.NaiveElement14(searchTerm);
+                    if (string.IsNullOrEmpty(result)) {
+                        // Try Mouser third
+                        result = Webscraper.NaiveMouser(searchTerm);
+                        if (string.IsNullOrEmpty(result)) {
+                            // Try RS fourth
+                            result = Webscraper.NaiveRS(searchTerm);
+                        }
+                    }
+                }
+            return result;
         }
     }
 }

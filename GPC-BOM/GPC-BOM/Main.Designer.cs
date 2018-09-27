@@ -47,15 +47,19 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnRemove = new System.Windows.Forms.Button();
-            this.btnPreview = new System.Windows.Forms.Button();
             this.btnClearQueue = new System.Windows.Forms.Button();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.dataGridView = new System.Windows.Forms.DataGridView();
             this.lblConvertOption = new System.Windows.Forms.Label();
             this.cbConvertOption = new System.Windows.Forms.ComboBox();
+            this.cbSheet = new System.Windows.Forms.ComboBox();
+            this.picWatermark = new System.Windows.Forms.PictureBox();
+            this.lblPreview = new System.Windows.Forms.Label();
+            this.tsStatus2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStripMain.SuspendLayout();
             this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picWatermark)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStripMain
@@ -172,7 +176,8 @@
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsProgressBar,
-            this.tsStatus});
+            this.tsStatus,
+            this.tsStatus2});
             this.statusStrip.Location = new System.Drawing.Point(0, 540);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(784, 22);
@@ -220,6 +225,7 @@
             this.lvFiles.TabIndex = 9;
             this.lvFiles.UseCompatibleStateImageBehavior = false;
             this.lvFiles.View = System.Windows.Forms.View.Details;
+            this.lvFiles.SelectedIndexChanged += new System.EventHandler(this.lvFiles_SelectedIndexChanged);
             this.lvFiles.DragDrop += new System.Windows.Forms.DragEventHandler(this.lvFiles_DragDrop);
             this.lvFiles.DragEnter += new System.Windows.Forms.DragEventHandler(this.lvFiles_DragEnter);
             // 
@@ -245,29 +251,19 @@
             // 
             // btnRemove
             // 
-            this.btnRemove.Location = new System.Drawing.Point(93, 480);
+            this.btnRemove.Location = new System.Drawing.Point(175, 480);
             this.btnRemove.Name = "btnRemove";
-            this.btnRemove.Size = new System.Drawing.Size(118, 23);
+            this.btnRemove.Size = new System.Drawing.Size(157, 23);
             this.btnRemove.TabIndex = 10;
             this.btnRemove.Text = "Remove Selected";
             this.btnRemove.UseVisualStyleBackColor = true;
             this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
             // 
-            // btnPreview
-            // 
-            this.btnPreview.Location = new System.Drawing.Point(217, 480);
-            this.btnPreview.Name = "btnPreview";
-            this.btnPreview.Size = new System.Drawing.Size(115, 23);
-            this.btnPreview.TabIndex = 11;
-            this.btnPreview.Text = "Preview Selected";
-            this.btnPreview.UseVisualStyleBackColor = true;
-            this.btnPreview.Click += new System.EventHandler(this.btnPreview_Click);
-            // 
             // btnClearQueue
             // 
             this.btnClearQueue.Location = new System.Drawing.Point(12, 480);
             this.btnClearQueue.Name = "btnClearQueue";
-            this.btnClearQueue.Size = new System.Drawing.Size(75, 23);
+            this.btnClearQueue.Size = new System.Drawing.Size(157, 23);
             this.btnClearQueue.TabIndex = 12;
             this.btnClearQueue.Text = "Clear Queue";
             this.btnClearQueue.UseVisualStyleBackColor = true;
@@ -284,7 +280,7 @@
             this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView.Location = new System.Drawing.Point(338, 27);
             this.dataGridView.Name = "dataGridView";
-            this.dataGridView.Size = new System.Drawing.Size(434, 447);
+            this.dataGridView.Size = new System.Drawing.Size(434, 422);
             this.dataGridView.TabIndex = 13;
             // 
             // lblConvertOption
@@ -309,16 +305,54 @@
             this.cbConvertOption.Size = new System.Drawing.Size(262, 21);
             this.cbConvertOption.TabIndex = 15;
             // 
+            // cbSheet
+            // 
+            this.cbSheet.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbSheet.FormattingEnabled = true;
+            this.cbSheet.Location = new System.Drawing.Point(510, 455);
+            this.cbSheet.Name = "cbSheet";
+            this.cbSheet.Size = new System.Drawing.Size(262, 21);
+            this.cbSheet.TabIndex = 16;
+            this.cbSheet.SelectedIndexChanged += new System.EventHandler(this.cbSheet_SelectedIndexChanged);
+            // 
+            // picWatermark
+            // 
+            this.picWatermark.BackColor = System.Drawing.Color.DarkGray;
+            this.picWatermark.Image = global::GPC_BOM.Properties.Resources.GPC_logo;
+            this.picWatermark.Location = new System.Drawing.Point(496, 45);
+            this.picWatermark.Name = "picWatermark";
+            this.picWatermark.Size = new System.Drawing.Size(108, 270);
+            this.picWatermark.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picWatermark.TabIndex = 17;
+            this.picWatermark.TabStop = false;
+            // 
+            // lblPreview
+            // 
+            this.lblPreview.AutoSize = true;
+            this.lblPreview.Location = new System.Drawing.Point(401, 458);
+            this.lblPreview.Name = "lblPreview";
+            this.lblPreview.Size = new System.Drawing.Size(103, 13);
+            this.lblPreview.TabIndex = 18;
+            this.lblPreview.Text = "Preview Worksheet:";
+            // 
+            // tsStatus2
+            // 
+            this.tsStatus2.Name = "tsStatus2";
+            this.tsStatus2.Size = new System.Drawing.Size(10, 17);
+            this.tsStatus2.Text = " ";
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 562);
+            this.Controls.Add(this.lblPreview);
+            this.Controls.Add(this.picWatermark);
+            this.Controls.Add(this.cbSheet);
             this.Controls.Add(this.cbConvertOption);
             this.Controls.Add(this.lblConvertOption);
             this.Controls.Add(this.dataGridView);
             this.Controls.Add(this.btnClearQueue);
-            this.Controls.Add(this.btnPreview);
             this.Controls.Add(this.btnRemove);
             this.Controls.Add(this.lblDragDrop);
             this.Controls.Add(this.lvFiles);
@@ -337,6 +371,7 @@
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picWatermark)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -368,12 +403,15 @@
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.Button btnRemove;
-        private System.Windows.Forms.Button btnPreview;
         private System.Windows.Forms.Button btnClearQueue;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.DataGridView dataGridView;
         private System.Windows.Forms.Label lblConvertOption;
         private System.Windows.Forms.ComboBox cbConvertOption;
+        private System.Windows.Forms.ComboBox cbSheet;
+        private System.Windows.Forms.PictureBox picWatermark;
+        private System.Windows.Forms.Label lblPreview;
+        private System.Windows.Forms.ToolStripStatusLabel tsStatus2;
     }
 }
 

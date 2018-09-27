@@ -13,7 +13,7 @@ using System.Diagnostics;
 
 namespace GPC_BOM {
     class PDFExtraction {
-        public void convertPDFToWord(frmMain mainApp, string pdfFile, string outFile) {
+        public void convertPDFToWord(frmMain mainApp, string inFile, string outFile) {
             // Initialise MS Word variables
             Word.Application oWord = null;
             Word.Documents oDocs = null;
@@ -22,8 +22,9 @@ namespace GPC_BOM {
             // Try to run word and open document
             try {
                 // Start Word
+                mainApp.statusUpdate2("(Starting Word)");
                 oWord = new Word.Application();
-                oWord.Visible = true; // for debugging
+                oWord.Visible = false;
                 oWord.DisplayAlerts = Word.WdAlertLevel.wdAlertsNone;
                 if (oWord == null) {
                     MessageBox.Show("Word could not be started. Please check that it is installed correctly and allows automation.");
@@ -33,6 +34,7 @@ namespace GPC_BOM {
                 else {
                     Debug.WriteLine("Word.Application is started");
                 }
+                mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
                 /*
                  * Check MS Word interop version (Interop version is not always the only installed version, but close enough)
@@ -44,6 +46,7 @@ namespace GPC_BOM {
                  * Office 2013: 15.0
                  * Office 2016: 16.0
                  * */
+                mainApp.statusUpdate2("(Checking Word Compatibility)");
                 string msWordVersion = oWord.Application.Version;
                 Debug.WriteLine("MS Word Version: " + msWordVersion);
                 if (Convert.ToDouble(msWordVersion) > 14) {
@@ -55,22 +58,28 @@ namespace GPC_BOM {
 
                 // Call subroutine to check/set registry value for MS Word silent PDF conversion
                 // TODO: Test before uncommenting for production
-                // this.setWordPDFConversionSilent(msWordVersion);
+                this.setWordPDFConversionSilent(msWordVersion);
+                mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
                 // Open Word document
-                pdfFile = @"C:\Users\Weiss\Desktop\GPC BOM Formats\Input Samples\Pdf\AST-PL-02318_0.01.pdf";
-                oDoc = oWord.Documents.Open(pdfFile, false, true);
+                mainApp.statusUpdate2("(Opening PDF and converting to Word)");
+                oDoc = oWord.Documents.Open(inFile, false, true);
                 Debug.WriteLine("Word.Document is opened");
+                mainApp.pbUpdate(20, frmMain.pbModeIncrement);
                 
                 // PDF automatic converts to Word format on open
                 // We can now save the document
-                outFile = @"C:\Users\Weiss\Desktop\pdf.docx";
+                mainApp.statusUpdate2("(Saving as Word document)");
                 oDoc.SaveAs2(outFile, Word.WdSaveFormat.wdFormatDocumentDefault);
+                mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
                 // Clean up and close apps
                 // TODO: Need to test if this also closes user's other windows!!!
+                mainApp.statusUpdate2("(Closing Word)");
                 Debug.WriteLine("Cleaning up...");
-                oWord.Documents.Close();
+                mainApp.pbUpdate(20, frmMain.pbModeIncrement);
+                oDoc.Close(false, Type.Missing, Type.Missing);
+                //oWord.Documents.Close(false, Type.Missing, Type.Missing);
                 oWord.Quit(false, Type.Missing, Type.Missing);
             }
             catch (Exception ex) {
@@ -96,18 +105,25 @@ namespace GPC_BOM {
         private void setWordPDFConversionSilent(string msWordVersion) {
             // Normally, opening a PDF document in word generates a conversion prompt
             // This prompt can be disabled via a registry key
-            RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Office\\" + msWordVersion.Trim() + "\\Word\\Options");
-            if (key != null) {
-                int value = Convert.ToInt16(key.GetValue("DisableConvertPdfWarning", -1, RegistryValueOptions.None).ToString());
-                if (value == 1) {
-                    Debug.WriteLine("Registry key already set.");
-                }
-                else {
-                    // Write the value regardless of whether it already exists or not
-                    key.SetValue("DisableConvertPdfWarning", 1, RegistryValueKind.DWord);
-                    key.Close();
+            // Enclose in try-catch as user may not have permissions to read/write registry
+            try {
+                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Office\\" + msWordVersion.Trim() + "\\Word\\Options", true);
+                if (key != null) {
+                    int value = Convert.ToInt16(key.GetValue("DisableConvertPdfWarning", -1, RegistryValueOptions.None).ToString());
+                    if (value == 1) {
+                        Debug.WriteLine("Registry key already set.");
+                    }
+                    else {
+                        // Write the value regardless of whether it already exists or not
+                        key.SetValue("DisableConvertPdfWarning", 1, RegistryValueKind.DWord);
+                        key.Close();
+                    }
                 }
             }
+            catch (Exception ex) {
+                Debug.WriteLine(ex.ToString());
+            }
         }
+
     }
 }

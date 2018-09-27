@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using Word = Microsoft.Office.Interop.Word;
 using Excel = Microsoft.Office.Interop.Excel;
+using ExcelDataReader;
 
 namespace GPC_BOM {
     public partial class frmMain : Form {
@@ -44,6 +45,7 @@ namespace GPC_BOM {
                     queueSize = queueSize + 1;
                 }
                 this.lblDragDrop.Hide();
+                this.picWatermark.Hide();
             }
             statusUpdate(String.Format("{0} files added to queue", queueSize));
         }
@@ -59,8 +61,6 @@ namespace GPC_BOM {
         private void msiDocumentation_Click(object sender, EventArgs e) {
             // TODO: include help file in resources
             MessageBox.Show("Not implemented yet!");
-            var PDFEx = new PDFExtraction();
-            PDFEx.convertPDFToWord(this, "test1", "test2");
         }
         private void msiAbout_Click(object sender, EventArgs e) {
             AboutBox about = new AboutBox();
@@ -107,6 +107,11 @@ namespace GPC_BOM {
             this.tsStatus.Text = message;
         }
 
+        public void statusUpdate2(string message) {
+            // Set the secondary status message
+            this.tsStatus2.Text = message;
+        }
+
         public static bool isFolderWritable(string tmpPath) {
             // Test if current context allows write to specified directory
             try {
@@ -124,6 +129,7 @@ namespace GPC_BOM {
             // Initialise background worker for progress bar sync
             //this.backgroundWorker.RunWorkerAsync();
             statusUpdate("Application started");
+            this.Icon = Properties.Resources.gpc_icon;
         }
 
         private void btnBrowse_Click(object sender, EventArgs e) {
@@ -164,6 +170,7 @@ namespace GPC_BOM {
             }
             // Hide the drag and drop label now
             this.lblDragDrop.Hide();
+            this.picWatermark.Hide();
             statusUpdate(String.Format("{0} files added to queue", queueSize));
         }
 
@@ -174,6 +181,10 @@ namespace GPC_BOM {
                 lvFiles.SelectedItems[0].Remove();
                 if (lvFiles.Items.Count == 0) {
                     this.lblDragDrop.Show();
+                    this.dataGridView.DataSource = null;
+                    this.dataGridView.Refresh();
+                    this.cbSheet.Items.Clear();
+                    this.picWatermark.Show();
                 }
             }
             else {
@@ -185,19 +196,10 @@ namespace GPC_BOM {
             // Removes all items from the list view
             lvFiles.Items.Clear();
             this.lblDragDrop.Show();
-        }
-
-        private void btnPreview_Click(object sender, EventArgs e) {
-            try {
-                string file = lvFiles.SelectedItems[0].SubItems[2].Text;
-                if (file != null) {
-                    // TODO: implement this
-                    MessageBox.Show("This feature is not ready yet.");
-                }
-            }
-            catch (ArgumentOutOfRangeException ex) {
-                Debug.Print(ex.ToString());
-            }
+            this.dataGridView.DataSource = null;
+            this.dataGridView.Refresh();
+            this.cbSheet.Items.Clear();
+            this.picWatermark.Show();
         }
 
         private void btnConvert_Click(object sender, EventArgs e) {
@@ -225,6 +227,10 @@ namespace GPC_BOM {
 
             #endregion
 
+            // Show wait cursor and block interaction
+            this.Cursor = Cursors.WaitCursor;
+            this.Enabled = false;
+
             string conversionFormat = null;
             if (cbConvertOption.SelectedIndex == 0) {
                 conversionFormat = "quotewin_single";
@@ -237,6 +243,10 @@ namespace GPC_BOM {
             }
 
             foreach (ListViewItem item in lvFiles.Items) {
+                // Trigger the preview
+                item.Selected = true;
+                item.SubItems[3].Text = "Processing";
+                // Get file type and process accordingly
                 if (String.Equals(item.SubItems[1].Text, ".doc", StringComparison.OrdinalIgnoreCase) == true || String.Equals(item.SubItems[1].Text, ".docx", StringComparison.OrdinalIgnoreCase) == true) {
                     // Give the user a status update
                     statusUpdate(String.Format("Processing file: {0}", item.SubItems[0].Text + item.SubItems[1].Text));
@@ -268,27 +278,40 @@ namespace GPC_BOM {
                 }
                 else if (String.Equals(item.SubItems[1].Text, ".pdf", StringComparison.OrdinalIgnoreCase) == true) {
                     statusUpdate(String.Format("Processing file: {0}", item.SubItems[0].Text + item.SubItems[1].Text));
-                    //// It's a PDF - convert to Excel first
-                    //string inFile = item.SubItems[2].Text;
-                    //string outFile = this.tbPath.Text + item.SubItems[0].Text + "_extract.xls";
-                    //// TODO: placeholder
-                    //// Reset progress bar for file
-                    // pbUpdate(0, pbModeReset);
-                    //// Next step: process as Excel
-                    //statusUpdate(String.Format("Processing file: {0}", item.SubItems[0].Text + "_extract.xls"));
-                    //var excelConvert = new ExcelConversion();
-                    //string inFile2 = outFile;
-                    //string outFile2 = this.tbPath.Text + item.SubItems[0].Text;
-                    //if (conversionFormat.Equals("sap")) {
-                    //    outFile2 = outFile2 + ".xls";
-                    //}
-                    //else {
-                    //    outFile2 = outFile2 + ".csv";
-                    //}
-                    //int headerRow = 1; // Replace this with a user input prompt
-                    //excelConvert.transformExcel(inFile2, outFile2, headerRow, conversionFormat);
-                    //// Reset progress bar for file
-                    // pbUpdate(0, pbModeReset);
+                    // It's a PDF - convert to Word first
+                    string inFile = item.SubItems[2].Text;
+                    string outFile = this.tbPath.Text + "\\" + item.SubItems[0].Text + "_extract.doc";
+                    var pdfEX = new PDFExtraction();
+                    pdfEX.convertPDFToWord(this, inFile, outFile);
+                    pdfEX = null;
+                    // Reset progress bar for file
+                    pbUpdate(0, pbModeReset);
+                    // Next step: convert from Word to Excel
+                    statusUpdate(String.Format("Processing file: {0}", item.SubItems[0].Text + "_extract.doc"));
+                    var wordEx = new WordExtraction();
+                    string inFile2 = outFile;
+                    string outFile2 = this.tbPath.Text + "\\" + item.SubItems[0].Text + "_extract.xls";
+                    wordEx.convertWordToExcel(this, inFile2, outFile2);
+                    wordEx = null;
+                    // Reset progress bar for file
+                    pbUpdate(0, pbModeReset);
+                    // Next step: process as Excel
+                    statusUpdate(String.Format("Processing file: {0}", item.SubItems[0].Text + "_extract.xls"));
+                    var excelConvert = new ExcelConversion();
+                    string inFile3 = outFile2;
+                    string outFile3 = this.tbPath.Text + "\\" + item.SubItems[0].Text + "_" + conversionFormat;
+                    if (conversionFormat.Equals("sap")) {
+                        outFile3 = outFile3 + ".xls";
+                    }
+                    else {
+                        outFile3 = outFile3 + ".csv";
+                    }
+                    // Ask user for row header
+                    int headerRow = askRowHeader(item.SubItems[0].Text);
+                    // Call Excel conversion function
+                    excelConvert.transformExcel(this, inFile3, outFile3, headerRow, conversionFormat);
+                    // Reset progress bar for file
+                    pbUpdate(0, pbModeReset);
                 }
                 else if (String.Equals(item.SubItems[1].Text, ".xls", StringComparison.OrdinalIgnoreCase) == true || String.Equals(item.SubItems[1].Text, ".xlsx", StringComparison.OrdinalIgnoreCase) == true) {
                     statusUpdate(String.Format("Processing file: {0}", item.SubItems[0].Text + item.SubItems[1].Text));
@@ -313,9 +336,14 @@ namespace GPC_BOM {
                     Debug.WriteLine("File type unrecognised.");
                     statusUpdate(String.Format("Unrecognised file skipped: {0}", item.SubItems[0].Text + item.SubItems[1].Text));
                 }
+                // Update status in list
+                item.SubItems[3].Text = "Complete";
             }
             // Queue has been completely processed
             statusUpdate("Ready");
+            statusUpdate2(" ");
+            this.Enabled = true;
+            this.Cursor = Cursors.Default;
         }
 
         private int askRowHeader(string filename) {
@@ -327,5 +355,80 @@ namespace GPC_BOM {
             return value;
         }
 
+        private void lvFiles_SelectedIndexChanged(object sender, EventArgs e) {
+            IExcelDataReader excelReader = null;
+            // Don't run when deselecting, clear instead
+            if (lvFiles.SelectedItems.Count == 0) {
+                this.dataGridView.DataSource = null;
+                this.dataGridView.Refresh();
+                this.cbSheet.Items.Clear();
+                this.picWatermark.Show();
+                return;
+            }
+            else {
+                this.picWatermark.Hide();
+                // Determine what kind of excel file it is
+                string file = lvFiles.SelectedItems[0].SubItems[2].Text;
+
+                if (lvFiles.SelectedItems[0].SubItems[1].Text.ToLower().Equals(".xls")) {
+                    // Reading from a binary Excel file ('97-2003 format; *.xls)
+                    FileStream stream = File.Open(file, FileMode.Open, FileAccess.Read);
+                    excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
+                }
+                else if (lvFiles.SelectedItems[0].SubItems[1].Text.ToLower().Equals(".xlsx")) {
+                    // Reading from a OpenXml Excel file (2007 format; *.xlsx)
+                    FileStream stream = File.Open(file, FileMode.Open, FileAccess.Read);
+                    excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+                }
+                else {
+                    return;
+                }
+            }
+            // DataSet - The result of each spreadsheet will be created in the result.Tables
+            DataSet result = excelReader.AsDataSet();
+            // Populate combo box of sheets
+            foreach (DataTable dt in result.Tables) {
+                cbSheet.Items.Add(dt.TableName);
+            }
+            // Close file
+            excelReader.Close();
+            // Show data
+            this.cbSheet.SelectedIndex = 0;
+            this.dataGridView.DataSource = result.Tables[cbSheet.SelectedIndex];
+            foreach (DataGridViewRow row in dataGridView.Rows) {
+                row.HeaderCell.Value = (row.Index + 1).ToString();
+            }
+            this.dataGridView.AutoResizeRowHeadersWidth(DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders);
+        }
+
+        private void cbSheet_SelectedIndexChanged(object sender, EventArgs e) {
+            IExcelDataReader excelReader = null;
+            // Determine what kind of excel file it is
+            string file = lvFiles.SelectedItems[0].SubItems[2].Text;
+
+            if (lvFiles.SelectedItems[0].SubItems[1].Text.ToLower().Equals(".xls")) {
+                // Reading from a binary Excel file ('97-2003 format; *.xls)
+                FileStream stream = File.Open(file, FileMode.Open, FileAccess.Read);
+                excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
+            }
+            else if (lvFiles.SelectedItems[0].SubItems[1].Text.ToLower().Equals(".xlsx")) {
+                // Reading from a OpenXml Excel file (2007 format; *.xlsx)
+                FileStream stream = File.Open(file, FileMode.Open, FileAccess.Read);
+                excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+            }
+            else {
+                return;
+            }
+            // DataSet - The result of each spreadsheet will be created in the result.Tables
+            DataSet result = excelReader.AsDataSet();
+            // Close file
+            excelReader.Close();
+            // Show data
+            dataGridView.DataSource = result.Tables[cbSheet.SelectedIndex];
+            foreach (DataGridViewRow row in dataGridView.Rows) {
+                row.HeaderCell.Value = (row.Index + 1).ToString();
+            }
+            dataGridView.AutoResizeRowHeadersWidth(DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders);
+        }
     }
 }

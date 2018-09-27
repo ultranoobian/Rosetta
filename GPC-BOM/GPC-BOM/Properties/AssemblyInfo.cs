@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("GPC-BOM")]
-[assembly: AssemblyDescription("A BOM conversion utility for GPC Electronics")]
+[assembly: AssemblyDescription("A BOM conversion utility for GPC Electronics.\r\n\r\n Brenden Cai\r\n Brenton Cheung\r\n Eddie Lam\r\n Mark Oh\r\n Rio Utaki\r\n Thomas Tu")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("GPC Electronics")]
 [assembly: AssemblyProduct("GPC-BOM")]

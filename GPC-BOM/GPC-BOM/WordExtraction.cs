@@ -27,6 +27,7 @@ namespace GPC_BOM {
             // Try to run word and open document
             try {
                 // Start Word
+                mainApp.statusUpdate2("(Starting Word)");
                 oWord = new Word.Application();
                 oWord.Visible = false;
                 oWord.DisplayAlerts = Word.WdAlertLevel.wdAlertsNone;
@@ -40,6 +41,7 @@ namespace GPC_BOM {
                 }
 
                 // Open Word document
+                mainApp.statusUpdate2("(Opening Word document)");
                 oDoc = oWord.Documents.Open(@wordFile);
                 Debug.WriteLine("Word.Document is opened");
                 mainApp.pbUpdate(20, frmMain.pbModeIncrement);
@@ -51,6 +53,7 @@ namespace GPC_BOM {
                 }
 
                 // Start Excel
+                mainApp.statusUpdate2("(Starting Excel)");
                 oExcel = new Excel.Application();
                 oExcel.Visible = false;
                 oExcel.DisplayAlerts = false;
@@ -72,6 +75,8 @@ namespace GPC_BOM {
 
                 // Copy each Word doc table into a new Excel worksheet
                 foreach (Word.Table table in oDoc.Tables) {
+                    int currentTable = 1;
+                    int totalTables = oDoc.Tables.Count;
                     for (int row = 1; row <= table.Rows.Count; row++) {
                         for (int col = 1; col <= table.Columns.Count; col++) {
                             try {
@@ -84,11 +89,14 @@ namespace GPC_BOM {
                             }
                         }
                     }
+                    currentTable = currentTable + 1;
                     oWorksheet = oWorkbook.Worksheets.Add();
+                    mainApp.statusUpdate2(String.Format("(Copying table {0} of {1} from Word to Excel)", currentTable, totalTables));
                 }
                 // Delete excess sheet created by loop
                 oWorksheet.Delete();
                 Debug.WriteLine("Data copied. Attempting to save file...");
+                mainApp.statusUpdate2("(Saving extracted Excel data)");
                 mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
                 // Save the Excel workbook (should probably be careful about overwriting stuff if it exists)
@@ -99,10 +107,12 @@ namespace GPC_BOM {
                 // Clean up and close apps
                 // TODO: Need to test if this also closes user's other windows!!!
                 Debug.WriteLine("Cleaning up...");
+                mainApp.statusUpdate2("(Closing Word and Excel)");
                 mainApp.pbUpdate(20, frmMain.pbModeIncrement);
                 oExcel.Workbooks.Close();
                 oExcel.Quit();
-                oWord.Documents.Close();
+                oDoc.Close(false, Type.Missing, Type.Missing);
+                //oWord.Documents.Close();
                 oWord.Quit(false);
             }
             catch (Exception ex) {

@@ -2,6 +2,19 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OCR;
 
+namespace OCR.Tests
+{
+    [TestClass()]
+    public class WebscrapperTest
+    {
+        [TestMethod()]
+        public void API_MouserTest()
+        {
+            Assert.AreEqual("Crystals +/-20ppm 12MHZ", WebScrapper.MouserAPI_GetDescription("ABM3B-12.000MHZ-B2-T"));
+        }
+    }
+}
+
 namespace OCR_Test
 {
     [TestClass]

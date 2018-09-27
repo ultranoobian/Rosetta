@@ -1,6 +1,6 @@
 using System.Windows.Forms;
 using System.Net;
-
+using System;
 
 namespace OCR
 {
@@ -209,5 +209,40 @@ namespace OCR
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keyword">Part Number to search for</param>
+        /// <returns>First product description, otherwise empty string.</returns>
+        public static string MouserAPI_GetDescription(string keyword)
+        {
+            try
+            {
+                if (keyword.Trim().Length > 0)
+                {
+                    Mouser.AccountInfo ai = new Mouser.AccountInfo
+                    {
+                        PartnerID = "[REDACTED]"
+                    };
+                    Mouser.MouserHeader mh = new Mouser.MouserHeader
+                    {
+                        AccountInfo = ai
+                    };
+                    var sap = new Mouser.SearchAPISoapClient("SearchAPISoap");
+
+                    Mouser.ResultParts results = sap.SearchByPartNumber(mh, keyword, "2");
+                    if (results.Parts.Length > 0)
+                    {
+                        return results.Parts[0].Description;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
+            return "";
+        }
     }
 }

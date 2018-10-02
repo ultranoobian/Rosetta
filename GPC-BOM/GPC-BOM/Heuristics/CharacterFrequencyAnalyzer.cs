@@ -29,6 +29,17 @@ namespace GPC_BOM.Heuristics
 
             return charFrequencyObservations;
         }
+
+        public static Dictionary<int, decimal> CalculateHueristicValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        private static Dictionary<Category, int> AggregateCharacterFrequency(List<string> input)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 
 }

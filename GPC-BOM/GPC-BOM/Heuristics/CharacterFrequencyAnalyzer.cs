@@ -8,6 +8,8 @@ namespace GPC_BOM.Heuristics
 {
     public static class CharacterFrequencyAnalyzer
     {
+        private enum Category { SPACE, COMMA, PUNCTUATION, DIGITS, UPPERCASE, LOWERCASE};
+
         public static Dictionary<int, int> Analyze(List<string> input)
         {
             Dictionary<int, int> charFrequencyObservations = new Dictionary<int, int>();

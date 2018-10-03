@@ -8,7 +8,7 @@ namespace GPC_BOM.Heuristics
 {
     public static class CharacterFrequencyAnalyzer
     {
-        private enum Category { SPACE, COMMA, PUNCTUATION, DIGITS, UPPERCASE, LOWERCASE};
+        public enum Category { SPACE, COMMA, PUNCTUATION, DIGITS, UPPERCASE, LOWERCASE };
 
         public static Dictionary<int, int> Analyze(List<string> input)
         {
@@ -18,13 +18,16 @@ namespace GPC_BOM.Heuristics
                 charFrequencyObservations.Add(i, 0);
             }
 
-            foreach (string s in input)
+            if (input != null)
             {
-                foreach (char c in s)
+                foreach (string s in input)
                 {
-                    if (charFrequencyObservations.TryGetValue(c, out int foundValue))
+                    foreach (char c in s)
                     {
-                        charFrequencyObservations[c]++;
+                        if (charFrequencyObservations.TryGetValue(c, out int foundValue))
+                        {
+                            charFrequencyObservations[c]++;
+                        }
                     }
                 }
             }
@@ -37,9 +40,47 @@ namespace GPC_BOM.Heuristics
             throw new NotImplementedException();
         }
 
-        private static Dictionary<Category, int> AggregateCharacterFrequency(List<string> input)
+        public static Dictionary<Category, int> AggregateCharacterFrequency(List<string> input)
         {
-            throw new NotImplementedException();
+            var result = Analyze(input);
+            Dictionary<Category, int> categoricalFrequency = new Dictionary<Category, int>();
+            foreach (Category c in Enum.GetValues(typeof(Category)))
+            {
+                categoricalFrequency.Add(c, 0);
+            }
+
+            foreach (KeyValuePair<int, int> keyPair in result)
+            {
+                // Punctuation & Punctuation Specific values
+                if (keyPair.Key == 32)
+                {
+                    categoricalFrequency[Category.SPACE] += keyPair.Value;
+                }
+                if (keyPair.Key == 44)
+                {
+                    categoricalFrequency[Category.COMMA] += keyPair.Value;
+                }
+                if (keyPair.Key >= 32 && keyPair.Key <= 47)
+                {
+                    categoricalFrequency[Category.PUNCTUATION]++;
+                }
+
+                // Uppercase Characters && Lowercase Characters
+                if (keyPair.Key >= 65)
+                {
+                    if (keyPair.Key <= 90)
+                    {
+                        categoricalFrequency[Category.UPPERCASE] += keyPair.Value;
+                    }
+                    else if (keyPair.Key <= 122)
+                    {
+                        categoricalFrequency[Category.LOWERCASE] += keyPair.Value;
+                    }
+                }
+
+            }
+
+            return categoricalFrequency;
         }
 
     }

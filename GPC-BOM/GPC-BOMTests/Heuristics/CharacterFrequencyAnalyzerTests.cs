@@ -29,21 +29,64 @@ namespace GPC_BOM.Heuristics.Tests
         }
 
         [TestMethod()]
-        public void AnalyzeTest_SingleSet()
+        public void AnalyzeTest_SingleSet_UpperCase()
         {
             Dictionary<int, int> result = CharacterFrequencyAnalyzer.Analyze(new List<string> { "ABC" });
 
             Assert.AreEqual(1, result['A']);
             Assert.AreEqual(1, result['B']);
             Assert.AreEqual(1, result['C']);
+
+            // Select where element(s) e are NOT(A,B or C)
+            IEnumerable<int> allOtherCharacters = result.Where(e => !(e.Key == 'A' || e.Key == 'B' || e.Key == 'C')).Select(e => e.Value);
+            Assert.IsTrue(allOtherCharacters.All(e => e == 0));
         }
 
+        [TestMethod()]
+        public void AnalyzeTest_SingleSet_LowerCase()
+        {
+            Dictionary<int, int> result = CharacterFrequencyAnalyzer.Analyze(new List<string> { "abc" });
 
+            Assert.AreEqual(1, result['a']);
+            Assert.AreEqual(1, result['b']);
+            Assert.AreEqual(1, result['c']);
+
+            // Select where element(s) e are NOT(a,b or c)
+            IEnumerable<int> allOtherCharacters = result.Where(e => !(e.Key == 'a' || e.Key == 'b' || e.Key == 'c')).Select(e => e.Value);
+            Assert.IsTrue(allOtherCharacters.All(e => e == 0));
+        }
 
         [TestMethod()]
-        public void AggregateCharacterFrequency()
+        public void AnalyzeTest_SingleSet_Digits()
         {
-            //throw new NotImplementedException();
+            Dictionary<int, int> result = CharacterFrequencyAnalyzer.Analyze(new List<string> { "123" });
+
+            Assert.AreEqual(1, result['1']);
+            Assert.AreEqual(1, result['2']);
+            Assert.AreEqual(1, result['3']);
+
+            // Select where element(s) e are NOT(a,b or c)
+            IEnumerable<int> allOtherCharacters = result.Where(e => !(e.Key == '1' || e.Key == '2' || e.Key == '3')).Select(e => e.Value);
+            Assert.IsTrue(allOtherCharacters.All(e => e == 0));
+        }
+
+        [TestMethod()]
+        public void AnalyzeTest_SingleSet_Symbols()
+        {
+            List<string> input = new List<string> { ",./;'", "a!" };
+            Dictionary<int, int> result = CharacterFrequencyAnalyzer.Analyze(input);
+
+            Assert.AreEqual(1, result[',']);
+            Assert.AreEqual(1, result['.']);
+            Assert.AreEqual(1, result['/']);
+            Assert.AreEqual(1, result[';']);
+            Assert.AreEqual(1, result['\'']);
+
+
+            // Select where element(s) e are NOT(a,b or c)
+            IEnumerable<int> allOtherCharacters = result.Where(e => input.Any(s => s.Contains(e.Key.ToString())))
+                .Select(e => e.Value);
+            Assert.IsTrue(allOtherCharacters.All(e => e == 0));
         }
 
         [TestMethod()]
@@ -62,5 +105,7 @@ namespace GPC_BOM.Heuristics.Tests
             Assert.IsNotNull(result);
             Assert.AreEqual(5, result[CharacterFrequencyAnalyzer.Category.UPPERCASE]);
         }
+
+
     }
 }

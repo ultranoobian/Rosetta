@@ -65,6 +65,12 @@ namespace GPC_BOM.Heuristics
                     categoricalFrequency[Category.PUNCTUATION]++;
                 }
 
+                // Numbers
+                if (keyPair.Key >= 48 && keyPair.Key <= 57)
+                {
+                    categoricalFrequency[Category.DIGITS] += keyPair.Value;
+                }
+
                 // Uppercase Characters && Lowercase Characters
                 if (keyPair.Key >= 65)
                 {

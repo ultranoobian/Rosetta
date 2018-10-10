@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GPC_BOM.Heuristics
 {
-    class Classifier
+    public class Classifier
     {
         private static Classifier instance = null;
         public enum ColumnType { Description, Designator, Manufacturer, PartNumber, Quantity };
@@ -17,7 +17,7 @@ namespace GPC_BOM.Heuristics
         private List<List<double>> mfgClassifierValues = new List<List<double>>();
         private List<List<double>> mpnClassifierValues = new List<List<double>>();
 
-        public Classifier()
+        private Classifier()
         {
         }
 

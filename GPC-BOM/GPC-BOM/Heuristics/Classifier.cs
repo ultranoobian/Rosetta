@@ -9,7 +9,7 @@ namespace GPC_BOM.Heuristics
     class Classifier
     {
         static Classifier instance = null;
-        public enum ColumnType { Quanitity, Description, Manufacturer, PartNumber, Designator };
+        public enum ColumnType { Description, Designator, Manufacturer, PartNumber, Quantity };
 
         List<List<double>> qtyClassifierValues = new List<List<double>>();
         List<List<double>> designatorClassifierValues = new List<List<double>>();

@@ -98,6 +98,7 @@
     </Compile>
     <Compile Include="ExcelConversion.cs" />
     <Compile Include="Heuristics\CharacterFrequencyAnalyzer.cs" />
+    <Compile Include="Heuristics\Classifier.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>

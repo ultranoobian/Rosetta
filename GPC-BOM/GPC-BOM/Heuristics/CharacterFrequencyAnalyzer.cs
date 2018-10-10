@@ -8,7 +8,7 @@ namespace GPC_BOM.Heuristics
 {
     public static class CharacterFrequencyAnalyzer
     {
-        public enum Category { SPACE, COMMA, PUNCTUATION, DIGITS, UPPERCASE, LOWERCASE };
+        public enum Category { Space, Comma, Punctuation, Numbers, Uppercase, Lowercase };
 
         public static Dictionary<int, int> Analyze(List<string> input)
         {
@@ -54,21 +54,21 @@ namespace GPC_BOM.Heuristics
                 // Punctuation & Punctuation Specific values
                 if (keyPair.Key == 32)
                 {
-                    categoricalFrequency[Category.SPACE] += keyPair.Value;
+                    categoricalFrequency[Category.Space] += keyPair.Value;
                 }
                 if (keyPair.Key == 44)
                 {
-                    categoricalFrequency[Category.COMMA] += keyPair.Value;
+                    categoricalFrequency[Category.Comma] += keyPair.Value;
                 }
                 if (keyPair.Key >= 32 && keyPair.Key <= 47)
                 {
-                    categoricalFrequency[Category.PUNCTUATION]++;
+                    categoricalFrequency[Category.Punctuation]++;
                 }
 
                 // Numbers
                 if (keyPair.Key >= 48 && keyPair.Key <= 57)
                 {
-                    categoricalFrequency[Category.DIGITS] += keyPair.Value;
+                    categoricalFrequency[Category.Numbers] += keyPair.Value;
                 }
 
                 // Uppercase Characters && Lowercase Characters
@@ -76,11 +76,11 @@ namespace GPC_BOM.Heuristics
                 {
                     if (keyPair.Key <= 90)
                     {
-                        categoricalFrequency[Category.UPPERCASE] += keyPair.Value;
+                        categoricalFrequency[Category.Uppercase] += keyPair.Value;
                     }
                     else if (keyPair.Key <= 122)
                     {
-                        categoricalFrequency[Category.LOWERCASE] += keyPair.Value;
+                        categoricalFrequency[Category.Lowercase] += keyPair.Value;
                     }
                 }
 

@@ -103,7 +103,7 @@ namespace GPC_BOM.Heuristics.Tests
             var result = Heuristics.CharacterFrequencyAnalyzer.AggregateCharacterFrequency(new List<string> { "JARDO" });
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(5, result[CharacterFrequencyAnalyzer.Category.UPPERCASE]);
+            Assert.AreEqual(5, result[CharacterFrequencyAnalyzer.Category.Uppercase]);
         }
 
 

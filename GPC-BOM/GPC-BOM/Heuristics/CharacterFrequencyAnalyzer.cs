@@ -89,6 +89,55 @@ namespace GPC_BOM.Heuristics
             return categoricalFrequency;
         }
 
+        public static Dictionary<Category, int> AggregateCharacterFrequency(Dictionary<int,int> input)
+        {
+
+            Dictionary<Category, int> categoricalFrequency = new Dictionary<Category, int>();
+            foreach (Category c in Enum.GetValues(typeof(Category)))
+            {
+                categoricalFrequency.Add(c, 0);
+            }
+
+            foreach (KeyValuePair<int, int> keyPair in input)
+            {
+                // Punctuation & Punctuation Specific values
+                if (keyPair.Key == 32)
+                {
+                    categoricalFrequency[Category.Space] += keyPair.Value;
+                }
+                if (keyPair.Key == 44)
+                {
+                    categoricalFrequency[Category.Comma] += keyPair.Value;
+                }
+                if (keyPair.Key >= 32 && keyPair.Key <= 47)
+                {
+                    categoricalFrequency[Category.Punctuation]++;
+                }
+
+                // Numbers
+                if (keyPair.Key >= 48 && keyPair.Key <= 57)
+                {
+                    categoricalFrequency[Category.Numbers] += keyPair.Value;
+                }
+
+                // Uppercase Characters && Lowercase Characters
+                if (keyPair.Key >= 65)
+                {
+                    if (keyPair.Key <= 90)
+                    {
+                        categoricalFrequency[Category.Uppercase] += keyPair.Value;
+                    }
+                    else if (keyPair.Key <= 122)
+                    {
+                        categoricalFrequency[Category.Lowercase] += keyPair.Value;
+                    }
+                }
+
+            }
+
+            return categoricalFrequency;
+        }
+
     }
 
 }

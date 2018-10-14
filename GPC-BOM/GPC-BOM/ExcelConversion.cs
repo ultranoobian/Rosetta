@@ -27,50 +27,63 @@ namespace GPC_BOM {
         public static int? level_row = null;
         public const int level_sap_column = 1;
         public const int level_sap_row = 5;
-        public const int level_quotewin_column = 1;
-        public const int level_quotewin_row = 2;
+        public const int level_quotewin_multi_column = 1;
+        public const int level_quotewin_multi_row = 2;
+        // Quotewin_single doesn't have level field
 
         public static int? cpn_column = null;
         public static int? cpn_row = null;
         public const int cpn_sap_column = 2;
         public const int cpn_sap_row = 5;
-        public const int cpn_quotewin_column = 2;
-        public const int cpn_quotewin_row = 2;
+        public const int cpn_quotewin_multi_column = 2;
+        public const int cpn_quotewin_multi_row = 2;
+        public const int cpn_quotewin_single_column = 3;
+        public const int cpn_quotewin_single_row = 2;
 
         public static int? description_column = null;
         public static int? description_row = null;
         public const int description_sap_column = 3;
         public const int description_sap_row = 5;
-        public const int description_quotewin_column = 7;
-        public const int description_quotewin_row = 2;
+        public const int description_quotewin_multi_column = 7;
+        public const int description_quotewin_multi_row = 2;
+        public const int description_quotewin_single_column = 8;
+        public const int description_quotewin_single_row = 2;
 
         public static int? quantity_column = null;
         public static int? quantity_row = null;
         public const int quantity_sap_column = 4;
         public const int quantity_sap_row = 5;
-        public const int quantity_quotewin_column = 5;
-        public const int quantity_quotewin_row = 2;
+        public const int quantity_quotewin_multi_column = 5;
+        public const int quantity_quotewin_multi_row = 2;
+        public const int quantity_quotewin_single_column = 6;
+        public const int quantity_quotewin_single_row = 2;
 
         public static int? designator_column = null;
         public static int? designator_row = null;
         public const int designator_sap_column = 5;
         public const int designator_sap_row = 5;
-        public const int designator_quotewin_column = 6;
-        public const int designator_quotewin_row = 2;
+        public const int designator_quotewin_multi_column = 6;
+        public const int designator_quotewin_multi_row = 2;
+        public const int designator_quotewin_single_column = 7;
+        public const int designator_quotewin_single_row = 2;
 
         public static int? manufacturer_column = null;
         public static int? manufacturer_row = null;
         public const int manufacturer_sap_column = 6;
         public const int manufacturer_sap_row = 5;
-        public const int manufacturer_quotewin_column = 30;
-        public const int manufacturer_quotewin_row = 2;
+        public const int manufacturer_quotewin_multi_column = 30;
+        public const int manufacturer_quotewin_multi_row = 2;
+        public const int manufacturer_quotewin_single_column = 31;
+        public const int manufacturer_quotewin_single_row = 2;
 
         public static int? mpn_column = null;
         public static int? mpn_row = null;
         public const int mpn_sap_column = 7;
         public const int mpn_sap_row = 5;
-        public const int mpn_quotewin_column = 18;
-        public const int mpn_quotewin_row = 2;
+        public const int mpn_quotewin_multi_column = 18;
+        public const int mpn_quotewin_multi_row = 2;
+        public const int mpn_quotewin_single_column = 19;
+        public const int mpn_quotewin_single_row = 2;
 
         public static int? process_column = null;
         public static int? process_row = null;
@@ -85,8 +98,10 @@ namespace GPC_BOM {
         public const int notes_sap_column = 9;
         public const int notes_sap_row = 5;
         // Just a guess here that 'notes' corresponds to 'long comment'
-        public const int notes_quotewin_column = 24;
-        public const int notes_quotewin_row = 2;
+        public const int notes_quotewin_multi_column = 24;
+        public const int notes_quotewin_multi_row = 2;
+        public const int notes_quotewin_single_column = 25;
+        public const int notes_quotewin_single_row = 2;
 
         public const string dataMissingMessage = "<Missing Data>";
 
@@ -355,8 +370,10 @@ namespace GPC_BOM {
 
                 // Copy template from resources
                 mainApp.statusUpdate2("(Creating and opening output file)");
-                if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                    File.WriteAllBytes(@outFile, Properties.Resources.Quotewin);
+                if (fileType.Equals("quotewin_single")) {
+                    File.WriteAllBytes(@outFile, Properties.Resources.Quotewin_single);
+                } else if (fileType.Equals("quotewin_multi")) {
+                    File.WriteAllBytes(@outFile, Properties.Resources.Quotewin_multi);
                 }
                 else if (fileType.Equals("sap")) {
                     File.WriteAllBytes(@outFile, Properties.Resources.SAP);
@@ -374,19 +391,23 @@ namespace GPC_BOM {
                     int rowCount = levelData.GetLength(0);
                     int columnCount = levelData.GetLength(1);
                     Excel.Range dataRange = null;
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        dataRange = oWorksheet2.Cells[level_quotewin_row, level_quotewin_column];
+                    // Quotewin_single does not have level
+                    if (fileType.Equals("quotewin_multi")) {
+                        dataRange = oWorksheet2.Cells[level_quotewin_multi_row, level_quotewin_multi_column];
                     }
                     else if (fileType.Equals("sap")) {
                         dataRange = oWorksheet2.Cells[level_sap_row, level_sap_column];
                     }
-                    dataRange = dataRange.get_Resize(rowCount, columnCount);
-                    dataRange.set_Value(Excel.XlRangeValueDataType.xlRangeValueDefault, levelData);
+                    if (dataRange != null) {
+                        // Null check in case of quotewin_single
+                        dataRange = dataRange.get_Resize(rowCount, columnCount);
+                        dataRange.set_Value(Excel.XlRangeValueDataType.xlRangeValueDefault, levelData);
+                    }
                 }
                 else {
                     // We need to mark any missing data
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        writeCell(oWorksheet2, level_quotewin_row, level_quotewin_column, dataMissingMessage);
+                    if (fileType.Equals("quotewin_multi")) {
+                        writeCell(oWorksheet2, level_quotewin_multi_row, level_quotewin_multi_column, dataMissingMessage);
                     }
                     else if (fileType.Equals("sap")) {
                         writeCell(oWorksheet2, level_sap_row, level_sap_column, dataMissingMessage);
@@ -400,8 +421,11 @@ namespace GPC_BOM {
                     int rowCount = cpnData.GetLength(0);
                     int columnCount = cpnData.GetLength(1);
                     Excel.Range dataRange = null;
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        dataRange = oWorksheet2.Cells[cpn_quotewin_row, cpn_quotewin_column];
+                    if (fileType.Equals("quotewin_single")) {
+                        dataRange = oWorksheet2.Cells[cpn_quotewin_single_row, cpn_quotewin_single_column];
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        dataRange = oWorksheet2.Cells[cpn_quotewin_multi_row, cpn_quotewin_multi_column];
                     }
                     else if (fileType.Equals("sap")) {
                         dataRange = oWorksheet2.Cells[cpn_sap_row, cpn_sap_column];
@@ -411,8 +435,11 @@ namespace GPC_BOM {
                 }
                 else {
                     // We need to mark any missing data
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        writeCell(oWorksheet2, cpn_quotewin_row, cpn_quotewin_column, dataMissingMessage);
+                    if (fileType.Equals("quotewin_single")) {
+                        writeCell(oWorksheet2, cpn_quotewin_single_row, cpn_quotewin_single_column, dataMissingMessage);
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        writeCell(oWorksheet2, cpn_quotewin_multi_row, cpn_quotewin_multi_column, dataMissingMessage);
                     }
                     else if (fileType.Equals("sap")) {
                         writeCell(oWorksheet2, cpn_sap_row, cpn_sap_column, dataMissingMessage);
@@ -426,8 +453,11 @@ namespace GPC_BOM {
                     int rowCount = descriptionData.GetLength(0);
                     int columnCount = descriptionData.GetLength(1);
                     Excel.Range dataRange = null;
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        dataRange = oWorksheet2.Cells[description_quotewin_row, description_quotewin_column];
+                    if (fileType.Equals("quotewin_single")) {
+                        dataRange = oWorksheet2.Cells[description_quotewin_single_row, description_quotewin_single_column];
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        dataRange = oWorksheet2.Cells[description_quotewin_multi_row, description_quotewin_multi_column];
                     }
                     else if (fileType.Equals("sap")) {
                         dataRange = oWorksheet2.Cells[description_sap_row, description_sap_column];
@@ -437,8 +467,11 @@ namespace GPC_BOM {
                 }
                 else {
                     // We need to mark any missing data
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        writeCell(oWorksheet2, description_quotewin_row, description_quotewin_column, dataMissingMessage);
+                    if (fileType.Equals("quotewin_single")) {
+                        writeCell(oWorksheet2, description_quotewin_single_row, description_quotewin_single_column, dataMissingMessage);
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        writeCell(oWorksheet2, description_quotewin_multi_row, description_quotewin_multi_column, dataMissingMessage);
                     }
                     else if (fileType.Equals("sap")) {
                         writeCell(oWorksheet2, description_sap_row, description_sap_column, dataMissingMessage);
@@ -452,8 +485,11 @@ namespace GPC_BOM {
                     int rowCount = quantityData.GetLength(0);
                     int columnCount = quantityData.GetLength(1);
                     Excel.Range dataRange = null;
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        dataRange = oWorksheet2.Cells[quantity_quotewin_row, quantity_quotewin_column];
+                    if (fileType.Equals("quotewin_single")) {
+                        dataRange = oWorksheet2.Cells[quantity_quotewin_single_row, quantity_quotewin_single_column];
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        dataRange = oWorksheet2.Cells[quantity_quotewin_multi_row, quantity_quotewin_multi_column];
                     }
                     else if (fileType.Equals("sap")) {
                         dataRange = oWorksheet2.Cells[quantity_sap_row, quantity_sap_column];
@@ -463,8 +499,11 @@ namespace GPC_BOM {
                 }
                 else {
                     // We need to mark any missing data
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        writeCell(oWorksheet2, quantity_quotewin_row, quantity_quotewin_column, dataMissingMessage);
+                    if (fileType.Equals("quotewin_single")) {
+                        writeCell(oWorksheet2, quantity_quotewin_single_row, quantity_quotewin_single_column, dataMissingMessage);
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        writeCell(oWorksheet2, quantity_quotewin_multi_row, quantity_quotewin_multi_column, dataMissingMessage);
                     }
                     else if (fileType.Equals("sap")) {
                         writeCell(oWorksheet2, quantity_sap_row, quantity_sap_column, dataMissingMessage);
@@ -478,8 +517,11 @@ namespace GPC_BOM {
                     int rowCount = designatorData.GetLength(0);
                     int columnCount = designatorData.GetLength(1);
                     Excel.Range dataRange = null;
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        dataRange = oWorksheet2.Cells[designator_quotewin_row, designator_quotewin_column];
+                    if (fileType.Equals("quotewin_single")) {
+                        dataRange = oWorksheet2.Cells[designator_quotewin_single_row, designator_quotewin_single_column];
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        dataRange = oWorksheet2.Cells[designator_quotewin_multi_row, designator_quotewin_multi_column];
                     }
                     else if (fileType.Equals("sap")) {
                         dataRange = oWorksheet2.Cells[designator_sap_row, designator_sap_column];
@@ -489,8 +531,11 @@ namespace GPC_BOM {
                 }
                 else {
                     // We need to mark any missing data
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        writeCell(oWorksheet2, designator_quotewin_row, designator_quotewin_column, dataMissingMessage);
+                    if (fileType.Equals("quotewin_single")) {
+                        writeCell(oWorksheet2, designator_quotewin_single_row, designator_quotewin_single_column, dataMissingMessage);
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        writeCell(oWorksheet2, designator_quotewin_multi_row, designator_quotewin_multi_column, dataMissingMessage);
                     }
                     else if (fileType.Equals("sap")) {
                         writeCell(oWorksheet2, designator_sap_row, designator_sap_column, dataMissingMessage);
@@ -504,8 +549,11 @@ namespace GPC_BOM {
                     int rowCount = manufacturerData.GetLength(0);
                     int columnCount = manufacturerData.GetLength(1);
                     Excel.Range dataRange = null;
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        dataRange = oWorksheet2.Cells[manufacturer_quotewin_row, manufacturer_quotewin_column];
+                    if (fileType.Equals("quotewin_single")) {
+                        dataRange = oWorksheet2.Cells[manufacturer_quotewin_single_row, manufacturer_quotewin_single_column];
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        dataRange = oWorksheet2.Cells[manufacturer_quotewin_multi_row, manufacturer_quotewin_multi_column];
                     }
                     else if (fileType.Equals("sap")) {
                         dataRange = oWorksheet2.Cells[manufacturer_sap_row, manufacturer_sap_column];
@@ -515,8 +563,11 @@ namespace GPC_BOM {
                 }
                 else {
                     // We need to mark any missing data
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        writeCell(oWorksheet2, manufacturer_quotewin_row, manufacturer_quotewin_column, dataMissingMessage);
+                    if (fileType.Equals("quotewin_single")) {
+                        writeCell(oWorksheet2, manufacturer_quotewin_single_row, manufacturer_quotewin_single_column, dataMissingMessage);
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        writeCell(oWorksheet2, manufacturer_quotewin_multi_row, manufacturer_quotewin_multi_column, dataMissingMessage);
                     }
                     else if (fileType.Equals("sap")) {
                         writeCell(oWorksheet2, manufacturer_sap_row, manufacturer_sap_column, dataMissingMessage);
@@ -530,8 +581,11 @@ namespace GPC_BOM {
                     int rowCount = mpnData.GetLength(0);
                     int columnCount = mpnData.GetLength(1);
                     Excel.Range dataRange = null;
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        dataRange = oWorksheet2.Cells[mpn_quotewin_row, mpn_quotewin_column];
+                    if (fileType.Equals("quotewin_single")) {
+                        dataRange = oWorksheet2.Cells[mpn_quotewin_single_row, mpn_quotewin_single_column];
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        dataRange = oWorksheet2.Cells[mpn_quotewin_multi_row, mpn_quotewin_multi_column];
                     }
                     else if (fileType.Equals("sap")) {
                         dataRange = oWorksheet2.Cells[mpn_sap_row, mpn_sap_column];
@@ -541,8 +595,11 @@ namespace GPC_BOM {
                 }
                 else {
                     // We need to mark any missing data
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        writeCell(oWorksheet2, mpn_quotewin_row, mpn_quotewin_column, dataMissingMessage);
+                    if (fileType.Equals("quotewin_single")) {
+                        writeCell(oWorksheet2, mpn_quotewin_single_row, mpn_quotewin_single_column, dataMissingMessage);
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        writeCell(oWorksheet2, mpn_quotewin_multi_row, mpn_quotewin_multi_column, dataMissingMessage);
                     }
                     else if (fileType.Equals("sap")) {
                         writeCell(oWorksheet2, mpn_sap_row, mpn_sap_column, dataMissingMessage);
@@ -556,11 +613,7 @@ namespace GPC_BOM {
                     int rowCount = processData.GetLength(0);
                     int columnCount = processData.GetLength(1);
                     Excel.Range dataRange = null;
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        // Quotewin format does not have process field
-                        //dataRange = oWorksheet2.Cells[process_quotewin_row, process_quotewin_column];
-                    }
-                    else if (fileType.Equals("sap")) {
+                    if (fileType.Equals("sap")) {
                         dataRange = oWorksheet2.Cells[process_sap_row, process_sap_column];
                     }
                     if (dataRange != null) {
@@ -570,11 +623,7 @@ namespace GPC_BOM {
                 }
                 else {
                     // We need to mark any missing data
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        // Quotewin format does not have process field
-                        //writeCell(oWorksheet2, process_quotewin_row, process_quotewin_column, dataMissingMessage);
-                    }
-                    else if (fileType.Equals("sap")) {
+                    if (fileType.Equals("sap")) {
                         writeCell(oWorksheet2, process_sap_row, process_sap_column, dataMissingMessage);
                         // Highlighting is only possible with the Excel file format, not CSV
                         highlightCell(oWorksheet2, process_sap_row, process_sap_column, Excel.XlRgbColor.rgbYellow);
@@ -586,8 +635,11 @@ namespace GPC_BOM {
                     int rowCount = notesData.GetLength(0);
                     int columnCount = notesData.GetLength(1);
                     Excel.Range dataRange = null;
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        dataRange = oWorksheet2.Cells[notes_quotewin_row, notes_quotewin_column];
+                    if (fileType.Equals("quotewin_single") ) {
+                        dataRange = oWorksheet2.Cells[notes_quotewin_single_row, notes_quotewin_single_column];
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        dataRange = oWorksheet2.Cells[notes_quotewin_multi_row, notes_quotewin_multi_column];
                     }
                     else if (fileType.Equals("sap")) {
                         dataRange = oWorksheet2.Cells[notes_sap_row, notes_sap_column];
@@ -597,8 +649,11 @@ namespace GPC_BOM {
                 }
                 else {
                     // We need to mark any missing data
-                    if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
-                        writeCell(oWorksheet2, notes_quotewin_row, notes_quotewin_column, dataMissingMessage);
+                    if (fileType.Equals("quotewin_single")) {
+                        writeCell(oWorksheet2, notes_quotewin_single_row, notes_quotewin_single_column, dataMissingMessage);
+                    }
+                    else if (fileType.Equals("quotewin_multi")) {
+                        writeCell(oWorksheet2, notes_quotewin_multi_row, notes_quotewin_multi_column, dataMissingMessage);
                     }
                     else if (fileType.Equals("sap")) {
                         writeCell(oWorksheet2, notes_sap_row, notes_sap_column, dataMissingMessage);
@@ -617,18 +672,18 @@ namespace GPC_BOM {
                 mainApp.statusUpdate2("(Checking for missing fields and searching the web)");
                 // At the time of writing, only missing descriptions can be retrieved
                 // MPN is usually the only unique identifier that can be searched
-                if (fileType.Equals("quotewin_single") || fileType.Equals("quotewin_multi")) {
+                if (fileType.Equals("quotewin_single")) {
                     // Iterate through every row of the sheet
                     for (int i = 2; i <= oWorksheet2.UsedRange.Rows.Count; i++) {
                         // Check if description is filled or not
-                        string descriptionValue = Convert.ToString(oWorksheet2.Cells[i, description_quotewin_column].Value2);
+                        string descriptionValue = Convert.ToString(oWorksheet2.Cells[i, description_quotewin_single_column].Value2);
                         if (string.IsNullOrEmpty(descriptionValue) || string.IsNullOrWhiteSpace(descriptionValue)) {
                             // Check if MPN is available
-                            string mpnValue = Convert.ToString(oWorksheet2.Cells[i, mpn_quotewin_column].Value2);
+                            string mpnValue = Convert.ToString(oWorksheet2.Cells[i, mpn_quotewin_single_column].Value2);
                             if (string.IsNullOrEmpty(mpnValue) || string.IsNullOrWhiteSpace(mpnValue)) {
                                 // Can't do anything if MPN is missing as well
-                                writeCell(oWorksheet2, i, description_quotewin_column, dataMissingMessage);
-                                writeCell(oWorksheet2, i, mpn_quotewin_column, dataMissingMessage);
+                                writeCell(oWorksheet2, i, description_quotewin_single_column, dataMissingMessage);
+                                writeCell(oWorksheet2, i, mpn_quotewin_single_column, dataMissingMessage);
                                 continue;
                             }
                             else {
@@ -636,12 +691,46 @@ namespace GPC_BOM {
                                 string result = tryWebScrape(mpnValue);
                                 if (string.IsNullOrEmpty(result) || string.IsNullOrWhiteSpace(result)) {
                                     // Couldn't find anything via web search
-                                    writeCell(oWorksheet2, i, description_quotewin_column, dataMissingMessage);
+                                    writeCell(oWorksheet2, i, description_quotewin_single_column, dataMissingMessage);
                                     continue;
                                 }
                                 else {
                                     // Write data to cell
-                                    writeCell(oWorksheet2, i, description_quotewin_column, result);
+                                    writeCell(oWorksheet2, i, description_quotewin_single_column, result);
+                                }
+                            }
+                        }
+                        else {
+                            // Next loop if cell is already filled
+                            continue;
+                        }
+                    }
+                }
+                else if (fileType.Equals("quotewin_multi")) {
+                    // Iterate through every row of the sheet
+                    for (int i = 2; i <= oWorksheet2.UsedRange.Rows.Count; i++) {
+                        // Check if description is filled or not
+                        string descriptionValue = Convert.ToString(oWorksheet2.Cells[i, description_quotewin_multi_column].Value2);
+                        if (string.IsNullOrEmpty(descriptionValue) || string.IsNullOrWhiteSpace(descriptionValue)) {
+                            // Check if MPN is available
+                            string mpnValue = Convert.ToString(oWorksheet2.Cells[i, mpn_quotewin_multi_column].Value2);
+                            if (string.IsNullOrEmpty(mpnValue) || string.IsNullOrWhiteSpace(mpnValue)) {
+                                // Can't do anything if MPN is missing as well
+                                writeCell(oWorksheet2, i, description_quotewin_multi_column, dataMissingMessage);
+                                writeCell(oWorksheet2, i, mpn_quotewin_multi_column, dataMissingMessage);
+                                continue;
+                            }
+                            else {
+                                // Web scraping time!
+                                string result = tryWebScrape(mpnValue);
+                                if (string.IsNullOrEmpty(result) || string.IsNullOrWhiteSpace(result)) {
+                                    // Couldn't find anything via web search
+                                    writeCell(oWorksheet2, i, description_quotewin_multi_column, dataMissingMessage);
+                                    continue;
+                                }
+                                else {
+                                    // Write data to cell
+                                    writeCell(oWorksheet2, i, description_quotewin_multi_column, result);
                                 }
                             }
                         }

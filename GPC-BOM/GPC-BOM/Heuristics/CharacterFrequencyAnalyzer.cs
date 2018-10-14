@@ -24,7 +24,8 @@ namespace GPC_BOM.Heuristics
                 {
                     foreach (char c in s)
                     {
-                        if (charFrequencyObservations.TryGetValue(c, out int foundValue))
+                        int foundValue = 0;
+                        if (charFrequencyObservations.TryGetValue(c, out foundValue))
                         {
                             charFrequencyObservations[c]++;
                         }
@@ -48,7 +49,8 @@ namespace GPC_BOM.Heuristics
                 {
                     foreach (char c in s)
                     {
-                        if (charFrequencyObservations.TryGetValue(c, out int foundValue))
+                        int foundValue = 0;
+                        if (charFrequencyObservations.TryGetValue(c, out foundValue))
                         {
                             charFrequencyObservations[c]++;
                         }

@@ -68,7 +68,7 @@ namespace GPC_BOM.Heuristics
             }
         }
 
-        public ColumnType Classify(IEnumerable<string> input)
+        public Dictionary<ColumnType, double> Classify(IEnumerable<string> input)
         {
             //var a = CharacterFrequencyAnalyzer.AggregateCharacterFrequency(input.ToList());
             var a = CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
@@ -122,7 +122,7 @@ namespace GPC_BOM.Heuristics
                 calculatedDelta.Add(ColumnType.PartNumber, result);
             }
 
-            return calculatedDelta.Min().Key;
+            return calculatedDelta;
         }
     }
 }

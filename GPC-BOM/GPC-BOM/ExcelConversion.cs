@@ -8,6 +8,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Excel = Microsoft.Office.Interop.Excel;
+using System.Net;
 
 namespace GPC_BOM {
     class ExcelConversion {
@@ -143,10 +144,33 @@ namespace GPC_BOM {
                 // Heuristics!!!
                 oWorksheet = oWorkbook.ActiveSheet;
                 Debug.WriteLine("Processing file...");
+
+                #region Heuristics - Initialisation
+
+                // Step 1: Get/Create an instance of the classifier
+                Heuristics.Classifier heuristics_classifier = Heuristics.Classifier.GetInstance();
+
+                // Step 2: Load a training xls/csv file containing columns with the frequency values
+                List<double> dummy = new List<double>(); // Temporary until we have a training file
+
+                // Step 3: Add Quantity classifier values
+                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Quantity, dummy);
+                // Step 4: Add Designator classifier values
+                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Designator, dummy);
+                // Step 5: Add Description classifier values
+                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Description, dummy);
+                // Step 6: Add Manufacturer classifier values
+                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Manufacturer, dummy);
+                // Step 7: Add MPN classifier values
+                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.PartNumber, dummy);
+
+                #endregion
+
                 mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
-                #region Find column headers
-
+                // Do a basic search first to fill in the non-heuristics row/col numbers
+                #region Basic Search - Find column headers
+                
                 mainApp.statusUpdate2("(Searching for column headers)");
                 Excel.Range searchRange = oExcel.get_Range(headerRow.ToString() + ":" + headerRow.ToString(), Type.Missing);
 
@@ -246,6 +270,118 @@ namespace GPC_BOM {
                         notes_column = locationFound.Column;
                         notes_row = locationFound.Row + 1;
                         break;
+                    }
+                }
+
+                #endregion
+                // Overwrite col numbers with heuristics
+                #region Heuristics - Find Column Headers
+
+                mainApp.statusUpdate2("(Searching for column headers intelligently)");
+
+                // Use these to store the raw lowest heuristic values
+                double? quantityHeuristic = null;
+                double? descriptionHeuristic = null;
+                double? manufacturerHeuristic = null;
+                double? mpnHeuristic = null;
+                double? designatorHeuristic = null;
+
+                for (int i = 0; i < oWorksheet.UsedRange.Columns.Count; i++) {
+                    // Copy every column sequentially into a temporary array until we everything we're looking for
+                    Excel.Range temp_start = oWorksheet.Cells[1, i];
+                    Excel.Range temp_end = oWorksheet.Cells[oWorksheet.UsedRange.Rows.Count, i];
+                    Excel.Range temp_range = (Excel.Range)oWorksheet.get_Range(temp_start, temp_end);
+                    //tempArray = (System.Array)temp_range.Cells.Value2;
+                    object[] objectArray = temp_range.Cells.Value2;
+                    string[] tempArray = (string[])objectArray;
+
+                    // Classify the current column
+                    Dictionary<Heuristics.Classifier.ColumnType, double> heuristicsColumnType = heuristics_classifier.Classify(tempArray);
+
+                    // Determine whether a columns belongs to a specific type
+                    switch (heuristicsColumnType.Min().Key) {
+                        case Heuristics.Classifier.ColumnType.Quantity:
+                            if (!quantityHeuristic.HasValue) {
+                                // First time a column has been predicted to be 'quantity'
+                                quantityHeuristic = heuristicsColumnType.Min().Value;
+                                quantity_column = i;
+                            }
+                            else if (heuristicsColumnType.Min().Value < quantityHeuristic) {
+                                // Not the first time, but this one seems more likely
+                                quantityHeuristic = heuristicsColumnType.Min().Value;
+                                quantity_column = i;
+                            }
+                            if (!quantity_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                quantity_row = 2;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.Description:
+                            if (!descriptionHeuristic.HasValue) {
+                                // First time a column has been predicted to be 'description'
+                                descriptionHeuristic = heuristicsColumnType.Min().Value;
+                                description_column = i;
+                            }
+                            else if (heuristicsColumnType.Min().Value < descriptionHeuristic) {
+                                // Not the first time, but this one seems more likely
+                                descriptionHeuristic = heuristicsColumnType.Min().Value;
+                                description_column = i;
+                            }
+                            if (!description_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                description_row = 2;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.PartNumber:
+                            if (!mpnHeuristic.HasValue) {
+                                // First time a column has been predicted to be 'mpn'
+                                mpnHeuristic = heuristicsColumnType.Min().Value;
+                                mpn_column = i;
+                            }
+                            else if (heuristicsColumnType.Min().Value < mpnHeuristic) {
+                                // Not the first time, but this one seems more likely
+                                mpnHeuristic = heuristicsColumnType.Min().Value;
+                                mpn_column = i;
+                            }
+                            if (!mpn_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                mpn_row = 2;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.Designator:
+                            if (!designatorHeuristic.HasValue) {
+                                // First time a column has been predicted to be 'designator'
+                                designatorHeuristic = heuristicsColumnType.Min().Value;
+                                designator_column = i;
+                            }
+                            else if (heuristicsColumnType.Min().Value < designatorHeuristic) {
+                                // Not the first time, but this one seems more likely
+                                designatorHeuristic = heuristicsColumnType.Min().Value;
+                                designator_column = i;
+                            }
+                            if (!designator_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                designator_row = 2;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.Manufacturer:
+                            if (!manufacturerHeuristic.HasValue) {
+                                // First time a column has been predicted to be 'manufacturer'
+                                manufacturerHeuristic = heuristicsColumnType.Min().Value;
+                                manufacturer_column = i;
+                            }
+                            else if (heuristicsColumnType.Min().Value < manufacturerHeuristic) {
+                                // Not the first time, but this one seems more likely
+                                manufacturerHeuristic = heuristicsColumnType.Min().Value;
+                                manufacturer_column = i;
+                            }
+                            if (!manufacturer_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                manufacturer_row = 2;
+                            }
+                            break;
+                        default:
+                            break;
                     }
                 }
 
@@ -837,24 +973,78 @@ namespace GPC_BOM {
             oWorksheet.Cells[row, column].Interior.Color = colourValue;
         }
 
+        public static bool CheckForInternetConnection() {
+            // https://stackoverflow.com/a/2031831/2553699
+            try {
+                using (var client = new WebClient())
+                using (client.OpenRead("http://clients3.google.com/generate_204")) {
+                    return true;
+                }
+            }
+            catch {
+                return false;
+            }
+        }
+
         private string tryWebScrape(string searchTerm) {
             // Blank string as default
             string result = "";
-                // Try DigiKey first
-                result = Webscraper.NaiveDigikey(searchTerm);
+
+            // Check if we can connect to the Internet
+            if (CheckForInternetConnection() == false) {
+                MessageBox.Show("Tried to access Google to check Internet connection, but failed. Aborting web scrape operation.");
+                return result;
+            }
+
+            // Retrieve current setting values for web scraping order
+            List<string> webOrder = new List<string>();
+            webOrder.Add(Properties.Settings.Default.webOrder1);
+            webOrder.Add(Properties.Settings.Default.webOrder2);
+            webOrder.Add(Properties.Settings.Default.webOrder3);
+            webOrder.Add(Properties.Settings.Default.webOrder4);
+            for (int i = 0; i < webOrder.Count; i++) {
                 if (string.IsNullOrEmpty(result)) {
-                    // Try Element14 second
-                    result = Webscraper.NaiveElement14(searchTerm);
-                    if (string.IsNullOrEmpty(result)) {
-                        // Try Mouser third
-                        result = Webscraper.NaiveMouser(searchTerm);
-                        if (string.IsNullOrEmpty(result)) {
-                            // Try RS fourth
-                            result = Webscraper.NaiveRS(searchTerm);
-                        }
+                    switch (webOrder[i]) {
+                        case "NaiveDigikey":
+                            result = NaiveDigikey(searchTerm);
+                            break;
+                        case "NaiveMouser":
+                            result = NaiveMouser(searchTerm);
+                            break;
+                        case "NaiveElement14":
+                            result = NaiveElement14(searchTerm);
+                            break;
+                        case "NaiveRS":
+                            result = NaiveRS(searchTerm);
+                            break;
                     }
                 }
+                else {
+                    break;
+                }
+            }
             return result;
+        }
+
+        private string NaiveDigikey(string searchTerm) {
+            string retVal = "";
+            retVal = Webscraper.NaiveDigikey(searchTerm);
+            return retVal;
+        }
+        private string NaiveMouser(string searchTerm) {
+            string retVal = "";
+            retVal = Webscraper.NaiveMouser(searchTerm);
+            return retVal;
+        }
+        private string NaiveElement14(string searchTerm) {
+            string retVal = "";
+            retVal = Webscraper.NaiveElement14(searchTerm);
+            return retVal;
+        }
+        private string NaiveRS(string searchTerm) {
+            string retVal = "";
+            retVal = Webscraper.NaiveRS(searchTerm);
+            return retVal;
         }
     }
 }

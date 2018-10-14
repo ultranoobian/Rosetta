@@ -94,5 +94,17 @@
   &lt;string&gt;bom notes&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
+    <Setting Name="webOrder1" Type="System.String" Scope="User">
+      <Value Profile="(Default)">NaiveDigikey</Value>
+    </Setting>
+    <Setting Name="webOrder2" Type="System.String" Scope="User">
+      <Value Profile="(Default)">NaiveMouser</Value>
+    </Setting>
+    <Setting Name="webOrder3" Type="System.String" Scope="User">
+      <Value Profile="(Default)">NaiveElement14</Value>
+    </Setting>
+    <Setting Name="webOrder4" Type="System.String" Scope="User">
+      <Value Profile="(Default)">NaiveRS</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

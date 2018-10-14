@@ -78,12 +78,41 @@ namespace GPC_BOM {
             }
             this.tbNotes.Text = notes;
 
+            // Retrieve current setting values for web scraping order
+            List<string> webOrder = new List<string>();
+            webOrder.Add(Properties.Settings.Default.webOrder1);
+            webOrder.Add(Properties.Settings.Default.webOrder2);
+            webOrder.Add(Properties.Settings.Default.webOrder3);
+            webOrder.Add(Properties.Settings.Default.webOrder4);
+            for (int i = 0; i < webOrder.Count; i++) {
+                switch (webOrder[i]) {
+                    case "NaiveDigikey":
+                        this.numDigikey.Value = i + 1;
+                        break;
+                    case "NaiveMouser":
+                        this.numMouser.Value = i + 1;
+                        break;
+                    case "NaiveElement14":
+                        this.numElement14.Value = i + 1;
+                        break;
+                    case "NaiveRS":
+                        this.numRS.Value = i + 1;
+                        break;
+                }
+            }
+
             #endregion
         }
 
         private void btnSave_Click(object sender, EventArgs e) {
+            // Check to ensure that settings are valid
+            List<int> orderList = new List<int> {(int)this.numDigikey.Value, (int)this.numElement14.Value, (int)this.numMouser.Value, (int)this.numRS.Value};
+            bool orderUnique = orderList.Distinct().Count() == orderList.Count();
+            if (!orderUnique) {
+                MessageBox.Show("Please double-check the order of the web scrapers to ensure that assigned values are unique.");
+                return;
+            }
             // Overwrite settings by splitting each string to an array, then convert array to collection
-
             #region Overwrite settings
 
             // Save setting values for Level
@@ -149,11 +178,88 @@ namespace GPC_BOM {
                 Properties.Settings.Default.cNotes.Add(item);
             }
 
-            // Save central setting store to file
+            // Save setting values for web scraping order
+            switch ((int)this.numDigikey.Value) {
+                case 1:
+                    Properties.Settings.Default.webOrder1 = "NaiveDigikey";
+                    break;
+                case 2:
+                    Properties.Settings.Default.webOrder2 = "NaiveDigikey";
+                    break;
+                case 3:
+                    Properties.Settings.Default.webOrder3 = "NaiveDigikey";
+                    break;
+                case 4:
+                    Properties.Settings.Default.webOrder4 = "NaiveDigikey";
+                    break;
+            }
+            switch ((int)this.numMouser.Value) {
+                case 1:
+                    Properties.Settings.Default.webOrder1 = "NaiveMouser";
+                    break;
+                case 2:
+                    Properties.Settings.Default.webOrder2 = "NaiveMouser";
+                    break;
+                case 3:
+                    Properties.Settings.Default.webOrder3 = "NaiveMouser";
+                    break;
+                case 4:
+                    Properties.Settings.Default.webOrder4 = "NaiveMouser";
+                    break;
+            }
+            switch ((int)this.numElement14.Value) {
+                case 1:
+                    Properties.Settings.Default.webOrder1 = "NaiveElement14";
+                    break;
+                case 2:
+                    Properties.Settings.Default.webOrder2 = "NaiveElement14";
+                    break;
+                case 3:
+                    Properties.Settings.Default.webOrder3 = "NaiveElement14";
+                    break;
+                case 4:
+                    Properties.Settings.Default.webOrder4 = "NaiveElement14";
+                    break;
+            }
+            switch ((int)this.numRS.Value) {
+                case 1:
+                    Properties.Settings.Default.webOrder1 = "NaiveRS";
+                    break;
+                case 2:
+                    Properties.Settings.Default.webOrder2 = "NaiveRS";
+                    break;
+                case 3:
+                    Properties.Settings.Default.webOrder3 = "NaiveRS";
+                    break;
+                case 4:
+                    Properties.Settings.Default.webOrder4 = "NaiveRS";
+                    break;
+            }
+
+            // Save central setting store to file, refresh
             // This is usually in \%userprofile%\AppData\Local <or> Roaming\...
             Properties.Settings.Default.Save();
+            Properties.Settings.Default.Reload();
 
             #endregion
+
+            this.Close();
         }
+
+        private void btnDefault_Click(object sender, EventArgs e) {
+            DialogResult dr = MessageBox.Show("Are you sure?",
+                      "Please Confirm", MessageBoxButtons.YesNo);
+            switch (dr) {
+                case DialogResult.Yes:
+                    Properties.Settings.Default.Reset();
+                    Properties.Settings.Default.Save();
+                    Properties.Settings.Default.Reload();
+                    this.Close();
+                    break;
+                case DialogResult.No:
+                    break;
+            }
+        }
+
     }
 }

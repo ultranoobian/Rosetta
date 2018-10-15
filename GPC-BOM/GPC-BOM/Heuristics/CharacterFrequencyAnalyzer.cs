@@ -61,11 +61,6 @@ namespace GPC_BOM.Heuristics
             return charFrequencyObservations;
         }
 
-        public static Dictionary<int, decimal> CalculateHueristicValue()
-        {
-            throw new NotImplementedException();
-        }
-
         public static Dictionary<Category, int> AggregateCharacterFrequency(List<string> input)
         {
             var result = Analyze(input);

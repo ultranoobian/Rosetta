@@ -10,31 +10,6 @@ namespace GPC_BOM.Heuristics
     {
         public enum Category { Space, Comma, Punctuation, Numbers, Uppercase, Lowercase };
 
-        public static Dictionary<int, int> Analyze(List<string> input)
-        {
-            Dictionary<int, int> charFrequencyObservations = new Dictionary<int, int>();
-            for (int i = 0; i < 128; i++)
-            {
-                charFrequencyObservations.Add(i, 0);
-            }
-
-            if (input != null)
-            {
-                foreach (string s in input)
-                {
-                    foreach (char c in s)
-                    {
-                        int foundValue = 0;
-                        if (charFrequencyObservations.TryGetValue(c, out foundValue))
-                        {
-                            charFrequencyObservations[c]++;
-                        }
-                    }
-                }
-            }
-
-            return charFrequencyObservations;
-        }
         public static Dictionary<int, int> Analyze(IEnumerable<string> input)
         {
             Dictionary<int, int> charFrequencyObservations = new Dictionary<int, int>();

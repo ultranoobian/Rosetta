@@ -183,6 +183,13 @@ namespace GPC_BOM.Heuristics
         public static Dictionary<Category, double> CalculateRelativeAggregateFrequency(IEnumerable<string> input)
         {
             Dictionary<Category, double> categoricalFrequency = new Dictionary<Category, double>();
+
+            // Initialize dictionary with each known Enum type 'Category'
+            foreach (Category c in Enum.GetValues(typeof(Category)))
+            {
+                categoricalFrequency.Add(c, 0);
+            }
+
             Dictionary<int, int> f = Analyze(input);
             var totalCharCount = f.Sum(kp => kp.Value);
 
@@ -231,6 +238,13 @@ namespace GPC_BOM.Heuristics
         public static Dictionary<Category, double> CalculateRelativeAggregateFrequency(IEnumerable<double> input)
         {
             Dictionary<Category, double> categoricalFrequency = new Dictionary<Category, double>();
+
+            // Initialize dictionary with each known Enum type 'Category'
+            foreach (Category c in Enum.GetValues(typeof(Category)))
+            {
+                categoricalFrequency.Add(c, 0);
+            }
+
             Dictionary<int, int> f = new Dictionary<int, int>();
             var totalCharCount = f.Sum(kp => kp.Value);
 

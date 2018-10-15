@@ -8,6 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using System.IO;
+using System.Reflection;
+using System.Diagnostics;
+
 namespace GPC_BOM {
     public partial class Settings : Form {
         public Settings() {

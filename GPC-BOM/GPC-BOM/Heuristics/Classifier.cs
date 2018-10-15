@@ -74,54 +74,47 @@ namespace GPC_BOM.Heuristics
             var a = CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
             Dictionary<ColumnType, double> calculatedDelta = new Dictionary<ColumnType, double>();
 
-            foreach (List<double> n in qtyClassifierValues)
-            {
-                //var result = a.Zip(CharacterFrequencyAnalyzer.AggregateCharacterFrequency(n), (b, c) => c - b);
-                double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) =>
-                {
-                    return (Math.Pow((b.Value - c.Value), 2) / c.Value);
-                }).Sum();
+            try {
+                foreach (List<double> n in qtyClassifierValues) {
+                    //var result = a.Zip(CharacterFrequencyAnalyzer.AggregateCharacterFrequency(n), (b, c) => c - b);
+                    double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) => {
+                        return (Math.Pow((b.Value - c.Value), 2) / c.Value);
+                    }).Sum();
 
-                calculatedDelta.Add(ColumnType.Quantity, result);
+                    calculatedDelta.Add(ColumnType.Quantity, result);
 
+                }
+                foreach (List<double> n in designatorClassifierValues) {
+                    double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) => {
+                        return (Math.Pow((b.Value - c.Value), 2) / c.Value);
+                    }).Sum();
+
+                    calculatedDelta.Add(ColumnType.Designator, result);
+                }
+                foreach (List<double> n in descriptionClassifierValues) {
+                    double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) => {
+                        return (Math.Pow((b.Value - c.Value), 2) / c.Value);
+                    }).Sum();
+
+                    calculatedDelta.Add(ColumnType.Description, result);
+                }
+                foreach (List<double> n in mfgClassifierValues) {
+                    double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) => {
+                        return (Math.Pow((b.Value - c.Value), 2) / c.Value);
+                    }).Sum();
+
+                    calculatedDelta.Add(ColumnType.Manufacturer, result);
+                }
+                foreach (List<double> n in mpnClassifierValues) {
+                    double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) => {
+                        return (Math.Pow((b.Value - c.Value), 2) / c.Value);
+                    }).Sum();
+
+                    calculatedDelta.Add(ColumnType.PartNumber, result);
+                }
             }
-            foreach (List<double> n in designatorClassifierValues)
-            {
-                double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) =>
-                {
-                    return (Math.Pow((b.Value - c.Value), 2) / c.Value);
-                }).Sum();
-
-                calculatedDelta.Add(ColumnType.Designator, result);
+            catch (Exception) {
             }
-            foreach (List<double> n in descriptionClassifierValues)
-            {
-                double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) =>
-                {
-                    return (Math.Pow((b.Value - c.Value), 2) / c.Value);
-                }).Sum();
-
-                calculatedDelta.Add(ColumnType.Description, result);
-            }
-            foreach (List<double> n in mfgClassifierValues)
-            {
-                double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) =>
-                {
-                    return (Math.Pow((b.Value - c.Value), 2) / c.Value);
-                }).Sum();
-
-                calculatedDelta.Add(ColumnType.Manufacturer, result);
-            }
-            foreach (List<double> n in mpnClassifierValues)
-            {
-                double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) =>
-                {
-                    return (Math.Pow((b.Value - c.Value), 2) / c.Value);
-                }).Sum();
-
-                calculatedDelta.Add(ColumnType.PartNumber, result);
-            }
-
             return calculatedDelta;
         }
     }

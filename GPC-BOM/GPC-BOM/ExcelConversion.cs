@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Net;
+using System.Reflection;
 
 namespace GPC_BOM {
     class ExcelConversion {
@@ -72,9 +73,9 @@ namespace GPC_BOM {
         public static int? manufacturer_row = null;
         public const int manufacturer_sap_column = 6;
         public const int manufacturer_sap_row = 5;
-        public const int manufacturer_quotewin_multi_column = 30;
+        public const int manufacturer_quotewin_multi_column = 16;
         public const int manufacturer_quotewin_multi_row = 2;
-        public const int manufacturer_quotewin_single_column = 31;
+        public const int manufacturer_quotewin_single_column = 17;
         public const int manufacturer_quotewin_single_row = 2;
 
         public static int? mpn_column = null;
@@ -150,19 +151,67 @@ namespace GPC_BOM {
                 // Step 1: Get/Create an instance of the classifier
                 Heuristics.Classifier heuristics_classifier = Heuristics.Classifier.GetInstance();
 
-                // Step 2: Load a training xls/csv file containing columns with the frequency values
-                List<double> dummy = new List<double>(); // Temporary until we have a training file
+                // Step 2: Load a training file containing columns with the frequency values
+                // For this to work, ensure that the Build Action is set to 'Embedded Resource'
+                var assembly = Assembly.GetExecutingAssembly();
+                var trainingFile = "GPC_BOM.Resources.training_combined.txt";
+                string line;
+                List<double> designator_training = new List<double>();
+                List<double> manufacturer_training = new List<double>();
+                List<double> mpn_training = new List<double>();
+                List<double> qty_training = new List<double>();
+                List<double> description_training = new List<double>();
+
+                using (Stream stream = assembly.GetManifestResourceStream(trainingFile)) {
+                    using (StreamReader reader = new StreamReader(stream)) {
+                        while ((line = reader.ReadLine()) != null) {
+                            // Debug.WriteLine(line);
+                            var elements = line.Split(new[] {','}, System.StringSplitOptions.RemoveEmptyEntries);
+                            int count = 0;
+                            string trainingType = "";
+
+                            foreach (string item in elements) {
+                                if (count == 0) {
+                                    // First item tell us which column the data is for
+                                    trainingType = item.ToString();
+                                    count = count + 1;
+                                    continue;
+                                }
+                                count = count + 1;
+                                switch (trainingType) {
+                                    case "designator":
+                                        designator_training.Add(Convert.ToDouble(item));
+                                        break;
+                                    case "manufacturer":
+                                        manufacturer_training.Add(Convert.ToDouble(item));
+                                        break;
+                                    case "mpn":
+                                        mpn_training.Add(Convert.ToDouble(item));
+                                        break;
+                                    case "qty":
+                                        qty_training.Add(Convert.ToDouble(item));
+                                        break;
+                                    case "description":
+                                        description_training.Add(Convert.ToDouble(item));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // Step 3: Add Quantity classifier values
-                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Quantity, dummy);
+                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Quantity, qty_training);
                 // Step 4: Add Designator classifier values
-                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Designator, dummy);
+                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Designator, designator_training);
                 // Step 5: Add Description classifier values
-                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Description, dummy);
+                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Description, description_training);
                 // Step 6: Add Manufacturer classifier values
-                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Manufacturer, dummy);
+                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.Manufacturer, manufacturer_training);
                 // Step 7: Add MPN classifier values
-                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.PartNumber, dummy);
+                heuristics_classifier.AddFrequencyValue(Heuristics.Classifier.ColumnType.PartNumber, mpn_training);
 
                 #endregion
 
@@ -286,103 +335,110 @@ namespace GPC_BOM {
                 double? mpnHeuristic = null;
                 double? designatorHeuristic = null;
 
-                for (int i = 0; i < oWorksheet.UsedRange.Columns.Count; i++) {
-                    // Copy every column sequentially into a temporary array until we everything we're looking for
-                    Excel.Range temp_start = oWorksheet.Cells[1, i];
-                    Excel.Range temp_end = oWorksheet.Cells[oWorksheet.UsedRange.Rows.Count, i];
-                    Excel.Range temp_range = (Excel.Range)oWorksheet.get_Range(temp_start, temp_end);
-                    //tempArray = (System.Array)temp_range.Cells.Value2;
-                    object[] objectArray = temp_range.Cells.Value2;
-                    string[] tempArray = (string[])objectArray;
+                try {
+                    for (int i = 0; i < oWorksheet.UsedRange.Columns.Count; i++) {
+                        // Copy every column sequentially into a temporary array until we find everything we're looking for
+                        Excel.Range temp_start = oWorksheet.Cells[1, i + 1];
+                        //Excel.Range temp_start = oWorksheet.Range[oWorksheet.Cells[1, i + 1]];
+                        Excel.Range temp_end = oWorksheet.Cells[oWorksheet.UsedRange.Rows.Count, i + 1];
+                        //Excel.Range temp_end = oWorksheet.Range[oWorksheet.Cells[oWorksheet.UsedRange.Rows.Count, i + 1]];
+                        Excel.Range temp_range = (Excel.Range)oWorksheet.get_Range(temp_start, temp_end);
+                        System.Array genArray = (System.Array)temp_range.Cells.Value2;
+                        //object[] objectArray = temp_range.Cells.Value2;
+                        //string[] tempArray = (string[])objectArray;
+                        string[] tempArray = genArray.OfType<object>().Select(o => o.ToString()).ToArray();
 
-                    // Classify the current column
-                    Dictionary<Heuristics.Classifier.ColumnType, double> heuristicsColumnType = heuristics_classifier.Classify(tempArray);
+                        // Classify the current column
+                        Dictionary<Heuristics.Classifier.ColumnType, double> heuristicsColumnType = heuristics_classifier.Classify(tempArray);
 
-                    // Determine whether a columns belongs to a specific type
-                    switch (heuristicsColumnType.Min().Key) {
-                        case Heuristics.Classifier.ColumnType.Quantity:
-                            if (!quantityHeuristic.HasValue) {
-                                // First time a column has been predicted to be 'quantity'
-                                quantityHeuristic = heuristicsColumnType.Min().Value;
-                                quantity_column = i;
-                            }
-                            else if (heuristicsColumnType.Min().Value < quantityHeuristic) {
-                                // Not the first time, but this one seems more likely
-                                quantityHeuristic = heuristicsColumnType.Min().Value;
-                                quantity_column = i;
-                            }
-                            if (!quantity_row.HasValue) {
-                                // If the row hasn't already been set, use a default
-                                quantity_row = 2;
-                            }
-                            break;
-                        case Heuristics.Classifier.ColumnType.Description:
-                            if (!descriptionHeuristic.HasValue) {
-                                // First time a column has been predicted to be 'description'
-                                descriptionHeuristic = heuristicsColumnType.Min().Value;
-                                description_column = i;
-                            }
-                            else if (heuristicsColumnType.Min().Value < descriptionHeuristic) {
-                                // Not the first time, but this one seems more likely
-                                descriptionHeuristic = heuristicsColumnType.Min().Value;
-                                description_column = i;
-                            }
-                            if (!description_row.HasValue) {
-                                // If the row hasn't already been set, use a default
-                                description_row = 2;
-                            }
-                            break;
-                        case Heuristics.Classifier.ColumnType.PartNumber:
-                            if (!mpnHeuristic.HasValue) {
-                                // First time a column has been predicted to be 'mpn'
-                                mpnHeuristic = heuristicsColumnType.Min().Value;
-                                mpn_column = i;
-                            }
-                            else if (heuristicsColumnType.Min().Value < mpnHeuristic) {
-                                // Not the first time, but this one seems more likely
-                                mpnHeuristic = heuristicsColumnType.Min().Value;
-                                mpn_column = i;
-                            }
-                            if (!mpn_row.HasValue) {
-                                // If the row hasn't already been set, use a default
-                                mpn_row = 2;
-                            }
-                            break;
-                        case Heuristics.Classifier.ColumnType.Designator:
-                            if (!designatorHeuristic.HasValue) {
-                                // First time a column has been predicted to be 'designator'
-                                designatorHeuristic = heuristicsColumnType.Min().Value;
-                                designator_column = i;
-                            }
-                            else if (heuristicsColumnType.Min().Value < designatorHeuristic) {
-                                // Not the first time, but this one seems more likely
-                                designatorHeuristic = heuristicsColumnType.Min().Value;
-                                designator_column = i;
-                            }
-                            if (!designator_row.HasValue) {
-                                // If the row hasn't already been set, use a default
-                                designator_row = 2;
-                            }
-                            break;
-                        case Heuristics.Classifier.ColumnType.Manufacturer:
-                            if (!manufacturerHeuristic.HasValue) {
-                                // First time a column has been predicted to be 'manufacturer'
-                                manufacturerHeuristic = heuristicsColumnType.Min().Value;
-                                manufacturer_column = i;
-                            }
-                            else if (heuristicsColumnType.Min().Value < manufacturerHeuristic) {
-                                // Not the first time, but this one seems more likely
-                                manufacturerHeuristic = heuristicsColumnType.Min().Value;
-                                manufacturer_column = i;
-                            }
-                            if (!manufacturer_row.HasValue) {
-                                // If the row hasn't already been set, use a default
-                                manufacturer_row = 2;
-                            }
-                            break;
-                        default:
-                            break;
+                        // Determine whether a column belongs to a specific type
+                        switch (heuristicsColumnType.Min().Key) {
+                            case Heuristics.Classifier.ColumnType.Quantity:
+                                if (!quantityHeuristic.HasValue) {
+                                    // First time a column has been predicted to be 'quantity'
+                                    quantityHeuristic = heuristicsColumnType.Min().Value;
+                                    quantity_column = i;
+                                }
+                                else if (heuristicsColumnType.Min().Value < quantityHeuristic) {
+                                    // Not the first time, but this one seems more likely
+                                    quantityHeuristic = heuristicsColumnType.Min().Value;
+                                    quantity_column = i;
+                                }
+                                if (!quantity_row.HasValue) {
+                                    // If the row hasn't already been set, use a default
+                                    quantity_row = 2;
+                                }
+                                break;
+                            case Heuristics.Classifier.ColumnType.Description:
+                                if (!descriptionHeuristic.HasValue) {
+                                    // First time a column has been predicted to be 'description'
+                                    descriptionHeuristic = heuristicsColumnType.Min().Value;
+                                    description_column = i;
+                                }
+                                else if (heuristicsColumnType.Min().Value < descriptionHeuristic) {
+                                    // Not the first time, but this one seems more likely
+                                    descriptionHeuristic = heuristicsColumnType.Min().Value;
+                                    description_column = i;
+                                }
+                                if (!description_row.HasValue) {
+                                    // If the row hasn't already been set, use a default
+                                    description_row = 2;
+                                }
+                                break;
+                            case Heuristics.Classifier.ColumnType.PartNumber:
+                                if (!mpnHeuristic.HasValue) {
+                                    // First time a column has been predicted to be 'mpn'
+                                    mpnHeuristic = heuristicsColumnType.Min().Value;
+                                    mpn_column = i;
+                                }
+                                else if (heuristicsColumnType.Min().Value < mpnHeuristic) {
+                                    // Not the first time, but this one seems more likely
+                                    mpnHeuristic = heuristicsColumnType.Min().Value;
+                                    mpn_column = i;
+                                }
+                                if (!mpn_row.HasValue) {
+                                    // If the row hasn't already been set, use a default
+                                    mpn_row = 2;
+                                }
+                                break;
+                            case Heuristics.Classifier.ColumnType.Designator:
+                                if (!designatorHeuristic.HasValue) {
+                                    // First time a column has been predicted to be 'designator'
+                                    designatorHeuristic = heuristicsColumnType.Min().Value;
+                                    designator_column = i;
+                                }
+                                else if (heuristicsColumnType.Min().Value < designatorHeuristic) {
+                                    // Not the first time, but this one seems more likely
+                                    designatorHeuristic = heuristicsColumnType.Min().Value;
+                                    designator_column = i;
+                                }
+                                if (!designator_row.HasValue) {
+                                    // If the row hasn't already been set, use a default
+                                    designator_row = 2;
+                                }
+                                break;
+                            case Heuristics.Classifier.ColumnType.Manufacturer:
+                                if (!manufacturerHeuristic.HasValue) {
+                                    // First time a column has been predicted to be 'manufacturer'
+                                    manufacturerHeuristic = heuristicsColumnType.Min().Value;
+                                    manufacturer_column = i;
+                                }
+                                else if (heuristicsColumnType.Min().Value < manufacturerHeuristic) {
+                                    // Not the first time, but this one seems more likely
+                                    manufacturerHeuristic = heuristicsColumnType.Min().Value;
+                                    manufacturer_column = i;
+                                }
+                                if (!manufacturer_row.HasValue) {
+                                    // If the row hasn't already been set, use a default
+                                    manufacturer_row = 2;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                }
+                catch (Exception) {
                 }
 
                 #endregion

@@ -14,6 +14,7 @@
     <Setting Name="cCPN" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;libref&lt;/string&gt;
   &lt;string&gt;cpn&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
@@ -34,6 +35,7 @@
   &lt;string&gt;qty/assy&lt;/string&gt;
   &lt;string&gt;qty per assy&lt;/string&gt;
   &lt;string&gt;e-bom quantity&lt;/string&gt;
+  &lt;string&gt;count&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
     <Setting Name="cDesignator" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">
@@ -61,6 +63,7 @@
   &lt;string&gt;maker&lt;/string&gt;
   &lt;string&gt;vendor&lt;/string&gt;
   &lt;string&gt;mfr  pns&lt;/string&gt;
+  &lt;string&gt;part remarks&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
     <Setting Name="cMPN" Roaming="true" Type="System.Collections.Specialized.StringCollection" Scope="User">

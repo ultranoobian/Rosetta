@@ -188,37 +188,35 @@ namespace GPC_BOM.Heuristics
 
             foreach (KeyValuePair<int, int> keyPair in f)
             {
-
-                if (keyPair.Key == 32)
-                {
-                    categoricalFrequency[Category.Space] += keyPair.Value;
-                }
-                if (keyPair.Key == 44)
-                {
-                    categoricalFrequency[Category.Comma] += keyPair.Value;
-                }
-                if (keyPair.Key >= 32 && keyPair.Key <= 47)
-                {
-                    categoricalFrequency[Category.Punctuation]++;
-                }
-
-                // Numbers
-                if (keyPair.Key >= 48 && keyPair.Key <= 57)
-                {
-                    categoricalFrequency[Category.Numbers] += keyPair.Value;
-                }
-
-                // Uppercase Characters && Lowercase Characters
-                if (keyPair.Key >= 65)
-                {
-                    if (keyPair.Key <= 90)
-                    {
-                        categoricalFrequency[Category.Uppercase] += keyPair.Value;
+                try {
+                    if (keyPair.Key == 32) {
+                        categoricalFrequency[Category.Space] += keyPair.Value;
                     }
-                    else if (keyPair.Key <= 122)
-                    {
-                        categoricalFrequency[Category.Lowercase] += keyPair.Value;
+                    if (keyPair.Key == 44) {
+                        categoricalFrequency[Category.Comma] += keyPair.Value;
                     }
+                    if (keyPair.Key >= 32 && keyPair.Key <= 47) {
+                        categoricalFrequency[Category.Punctuation]++;
+                    }
+
+                    // Numbers
+                    if (keyPair.Key >= 48 && keyPair.Key <= 57) {
+                        categoricalFrequency[Category.Numbers] += keyPair.Value;
+                    }
+
+                    // Uppercase Characters && Lowercase Characters
+                    if (keyPair.Key >= 65) {
+                        if (keyPair.Key <= 90) {
+                            categoricalFrequency[Category.Uppercase] += keyPair.Value;
+                        }
+                        else if (keyPair.Key <= 122) {
+                            categoricalFrequency[Category.Lowercase] += keyPair.Value;
+                        }
+                    }
+                }
+                catch (Exception) {
+                    // Seems to get an exception every time it tries to read the 32nd dictionary key/value pair
+                    continue;
                 }
             }
             foreach(KeyValuePair<Category, double> keyPair in categoricalFrequency)
@@ -238,37 +236,35 @@ namespace GPC_BOM.Heuristics
 
             for(int i = 0; i < input.Count(); i++)
             {
-
-                if (i == 32)
-                {
-                    categoricalFrequency[Category.Space] += input.ElementAt(i);
-                }
-                if (i == 44)
-                {
-                    categoricalFrequency[Category.Comma] += input.ElementAt(i);
-                }
-                if (i >= 32 && i <= 47)
-                {
-                    categoricalFrequency[Category.Punctuation]++;
-                }
-
-                // Numbers
-                if (i >= 48 && i <= 57)
-                {
-                    categoricalFrequency[Category.Numbers] += input.ElementAt(i);
-                }
-
-                // Uppercase Characters && Lowercase Characters
-                if (i >= 65)
-                {
-                    if (i <= 90)
-                    {
-                        categoricalFrequency[Category.Uppercase] += input.ElementAt(i);
+                try {
+                    if (i == 32) {
+                        categoricalFrequency[Category.Space] += input.ElementAt(i);
                     }
-                    else if (i <= 122)
-                    {
-                        categoricalFrequency[Category.Lowercase] += input.ElementAt(i);
+                    if (i == 44) {
+                        categoricalFrequency[Category.Comma] += input.ElementAt(i);
                     }
+                    if (i >= 32 && i <= 47) {
+                        categoricalFrequency[Category.Punctuation]++;
+                    }
+
+                    // Numbers
+                    if (i >= 48 && i <= 57) {
+                        categoricalFrequency[Category.Numbers] += input.ElementAt(i);
+                    }
+
+                    // Uppercase Characters && Lowercase Characters
+                    if (i >= 65) {
+                        if (i <= 90) {
+                            categoricalFrequency[Category.Uppercase] += input.ElementAt(i);
+                        }
+                        else if (i <= 122) {
+                            categoricalFrequency[Category.Lowercase] += input.ElementAt(i);
+                        }
+                    }
+                }
+                catch (Exception) {
+                    // Every time it hits 32, it gets an exception here as well
+                    continue;
                 }
             }
             foreach (KeyValuePair<Category, double> keyPair in categoricalFrequency)

@@ -59,8 +59,14 @@ namespace GPC_BOM {
         }
 
         private void msiDocumentation_Click(object sender, EventArgs e) {
-            // TODO: include help file in resources
-            MessageBox.Show("Not implemented yet!");
+            try {
+                string path = Path.Combine(Directory.GetCurrentDirectory(), "Resources\\SoftwareGuide.pdf");
+                Process.Start(path);
+            }
+            catch (Exception ex) {
+                MessageBox.Show("The help file seems to be missing, inaccessible or damaged.");
+                Debug.WriteLine(ex.ToString());
+            }
         }
         private void msiAbout_Click(object sender, EventArgs e) {
             AboutBox about = new AboutBox();
@@ -370,17 +376,24 @@ namespace GPC_BOM {
                 // Determine what kind of excel file it is
                 string file = lvFiles.SelectedItems[0].SubItems[2].Text;
 
-                if (lvFiles.SelectedItems[0].SubItems[1].Text.ToLower().Equals(".xls")) {
-                    // Reading from a binary Excel file ('97-2003 format; *.xls)
-                    FileStream stream = File.Open(file, FileMode.Open, FileAccess.Read);
-                    excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
+                try {
+                    if (lvFiles.SelectedItems[0].SubItems[1].Text.ToLower().Equals(".xls")) {
+                        // Reading from a binary Excel file ('97-2003 format; *.xls)
+                        FileStream stream = File.Open(file, FileMode.Open, FileAccess.Read);
+                        excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
+                    }
+                    else if (lvFiles.SelectedItems[0].SubItems[1].Text.ToLower().Equals(".xlsx")) {
+                        // Reading from a OpenXml Excel file (2007 format; *.xlsx)
+                        FileStream stream = File.Open(file, FileMode.Open, FileAccess.Read);
+                        excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+                    }
+                    else {
+                        return;
+                    }
                 }
-                else if (lvFiles.SelectedItems[0].SubItems[1].Text.ToLower().Equals(".xlsx")) {
-                    // Reading from a OpenXml Excel file (2007 format; *.xlsx)
-                    FileStream stream = File.Open(file, FileMode.Open, FileAccess.Read);
-                    excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
-                }
-                else {
+                catch (System.IO.IOException ex) {
+                    MessageBox.Show("Encountered an error reading the file. Check that it is not open or in use, and that it still exists.");
+                    Debug.WriteLine(ex.ToString());
                     return;
                 }
             }

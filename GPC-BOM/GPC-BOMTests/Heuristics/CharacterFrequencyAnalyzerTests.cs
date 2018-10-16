@@ -106,6 +106,18 @@ namespace GPC_BOM.Heuristics.Tests
             Assert.AreEqual(5, result[CharacterFrequencyAnalyzer.Category.Uppercase]);
         }
 
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_Double_EmptySetZero()
+        {
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(new List<double>());
+            Assert.IsTrue(result.All(e => e.Value == 0));
+        }
 
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_String_EmptySetZero()
+        {
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(new List<string>());
+            Assert.IsTrue(result.All(e => e.Value == 0));
+        }
     }
 }

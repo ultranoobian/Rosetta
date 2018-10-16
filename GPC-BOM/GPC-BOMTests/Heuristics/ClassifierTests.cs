@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using System.Reflection;
 
 namespace GPC_BOM.Heuristics.Tests
 {
@@ -14,7 +16,46 @@ namespace GPC_BOM.Heuristics.Tests
 
         public static void LoadFrequencyValues(Classifier classifier)
         {
-            throw new NotImplementedException();
+
+            using (StreamReader reader = new StreamReader("Resources/training_combined.txt"))
+            {
+                string content = reader.ReadToEnd();
+                List<string> lines = content.Split('\n').ToList();
+                List<List<string>> subLines = new List<List<string>>();
+                lines.ForEach(s => subLines.Add(s.Split(',').ToList()));
+
+                foreach (List<string> items in subLines)
+                {
+                    string category = items[0];
+                    List<double> frequencyValues = new List<double>();
+
+                    items.GetRange(1, items.Count - 1).ForEach(str => frequencyValues.Add(Convert.ToDouble(str)));
+
+                    switch (category)
+                    {
+                        case "designator":
+                            classifier.AddFrequencyValue(Classifier.ColumnType.Designator, frequencyValues);
+                            break;
+                        case "manufactuer":
+                            classifier.AddFrequencyValue(Classifier.ColumnType.Manufacturer, frequencyValues);
+                            break;
+                        case "mpn":
+                            classifier.AddFrequencyValue(Classifier.ColumnType.PartNumber, frequencyValues);
+                            break;
+                        case "qty":
+                            classifier.AddFrequencyValue(Classifier.ColumnType.Quantity, frequencyValues);
+                            break;
+                        case "description":
+                            classifier.AddFrequencyValue(Classifier.ColumnType.Description, frequencyValues);
+                            break;
+                        default:
+                            continue;
+                    }
+                }
+
+
+            }
+
         }
 
         [TestMethod()]

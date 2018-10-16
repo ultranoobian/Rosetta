@@ -125,22 +125,97 @@ namespace GPC_BOM.Heuristics.Tests
             Assert.IsTrue(result.All(e => e.Value == 0));
         }
 
-    
+
         [TestMethod()]
         public void CalculateRelativeAggregateFrequencyAnalyze_Double_SingleSet_Digits()
         {
+            const CharacterFrequencyAnalyzer.Category testCategory = CharacterFrequencyAnalyzer.Category.Numbers;
+
             List<double> input = new List<double>();
             for (int i = 0; i < 128; i++)
             {
                 input.Add(0.0d);
             }
-            for(int i = 48; i <= 57; i++)
+            for (int i = 48; i <= 57; i++)
             {
                 input[i] = 1.0d;
             }
 
             var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
-            Assert.AreEqual(1, result[CharacterFrequencyAnalyzer.Category.Numbers]);
+            Assert.AreEqual(1, result[testCategory]);
+            Assert.IsTrue(result.Where(kvp => kvp.Key != testCategory).All(kvp => kvp.Value == 0));
+        }
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_Double_SingleSet_UpperCase()
+        {
+            const CharacterFrequencyAnalyzer.Category testCategory = CharacterFrequencyAnalyzer.Category.Uppercase;
+
+            List<double> input = new List<double>();
+            for (int i = 0; i < 128; i++)
+            {
+                input.Add(0.0d);
+            }
+            for (int i = 65; i <= 90; i++)
+            {
+                input[i] = 1.0d;
+            }
+
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[testCategory]);
+            Assert.IsTrue(result.Where(kvp => kvp.Key != testCategory).All(kvp => kvp.Value == 0));
+        }
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_Double_SingleSet_LowerCase()
+        {
+            const CharacterFrequencyAnalyzer.Category testCategory = CharacterFrequencyAnalyzer.Category.Lowercase;
+
+            List<double> input = new List<double>();
+            for (int i = 0; i < 128; i++)
+            {
+                input.Add(0.0d);
+            }
+            for (int i = 97; i <= 122; i++)
+            {
+                input[i] = 1.0d;
+            }
+
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[testCategory]);
+            Assert.IsTrue(result.Where(kvp => kvp.Key != testCategory).All(kvp => kvp.Value == 0));
+        }
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_Double_SingleSet_Comma()
+        {
+            const CharacterFrequencyAnalyzer.Category testCategory = CharacterFrequencyAnalyzer.Category.Comma;
+
+            List<double> input = new List<double>();
+            for (int i = 0; i < 128; i++)
+            {
+                input.Add(0.0d);
+            }
+
+            input[44] = 1.0d;
+
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[testCategory]);
+        }
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_Double_SingleSet_Punctuation()
+        {
+            const CharacterFrequencyAnalyzer.Category testCategory = CharacterFrequencyAnalyzer.Category.Punctuation;
+
+            List<double> input = new List<double>();
+            for (int i = 0; i < 128; i++)
+            {
+                input.Add(0.0d);
+            }
+            for (int i = 32; i <= 47; i++)
+            {
+                input[i] = 1.0d;
+            }
+
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[testCategory]);
         }
 
         [TestMethod()]
@@ -161,10 +236,58 @@ namespace GPC_BOM.Heuristics.Tests
         [TestMethod()]
         public void CalculateRelativeAggregateFrequencyAnalyze_String_SingleSet_Digits()
         {
+            const CharacterFrequencyAnalyzer.Category testCategory = CharacterFrequencyAnalyzer.Category.Numbers;
+
             List<string> input = new List<string>() { "0123456789" };
             var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
-            Assert.AreEqual(1, result[CharacterFrequencyAnalyzer.Category.Numbers]);
+            Assert.AreEqual(1, result[testCategory]);
+            Assert.IsTrue(result.Where(kvp => kvp.Key != testCategory).All(kvp => kvp.Value == 0));
         }
 
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_String_SingleSet_UpperCase()
+        {
+            const CharacterFrequencyAnalyzer.Category testCategory = CharacterFrequencyAnalyzer.Category.Uppercase;
+
+            List<string> input = new List<string>() { "ABCDEFG" };
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[testCategory]);
+            Assert.IsTrue(result.Where(kvp => kvp.Key != testCategory).All(kvp => kvp.Value == 0));
+        }
+
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_String_SingleSet_LowerCase()
+        {
+            const CharacterFrequencyAnalyzer.Category testCategory = CharacterFrequencyAnalyzer.Category.Lowercase;
+
+            List<string> input = new List<string>() { "abcdefg" };
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[testCategory]);
+            Assert.IsTrue(result.Where(kvp => kvp.Key != testCategory).All(kvp => kvp.Value == 0));
+        }
+
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_String_SingleSet_Comma()
+        {
+            List<string> input = new List<string>() { ",,,,,," };
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[CharacterFrequencyAnalyzer.Category.Comma]);
+        }
+
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_String_SingleSet_Space()
+        {
+            List<string> input = new List<string>() { "      " };
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[CharacterFrequencyAnalyzer.Category.Space]);
+        }
+
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_String_SingleSet_Punctuation()
+        {
+            List<string> input = new List<string>() { " !\"#$%&\'()*+,-./" };
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[CharacterFrequencyAnalyzer.Category.Punctuation]);
+        }
     }
 }

@@ -100,42 +100,57 @@ namespace GPC_BOM.Heuristics
 
             foreach (KeyValuePair<int, int> keyPair in f)
             {
-                try {
-                    if (keyPair.Key == 32) {
+                try
+                {
+                    if (keyPair.Key == 32)
+                    {
                         categoricalFrequency[Category.Space] += keyPair.Value;
                     }
-                    if (keyPair.Key == 44) {
+                    if (keyPair.Key == 44)
+                    {
                         categoricalFrequency[Category.Comma] += keyPair.Value;
                     }
-                    if (keyPair.Key >= 32 && keyPair.Key <= 47) {
+                    if (keyPair.Key >= 32 && keyPair.Key <= 47)
+                    {
                         categoricalFrequency[Category.Punctuation]++;
                     }
 
                     // Numbers
-                    if (keyPair.Key >= 48 && keyPair.Key <= 57) {
+                    if (keyPair.Key >= 48 && keyPair.Key <= 57)
+                    {
                         categoricalFrequency[Category.Numbers] += keyPair.Value;
                     }
 
                     // Uppercase Characters && Lowercase Characters
-                    if (keyPair.Key >= 65) {
-                        if (keyPair.Key <= 90) {
+                    if (keyPair.Key >= 65)
+                    {
+                        if (keyPair.Key <= 90)
+                        {
                             categoricalFrequency[Category.Uppercase] += keyPair.Value;
                         }
-                        else if (keyPair.Key <= 122) {
+                        else if (keyPair.Key <= 122)
+                        {
                             categoricalFrequency[Category.Lowercase] += keyPair.Value;
                         }
                     }
                 }
-                catch (Exception) {
-                    // Seems to get an exception every time it tries to read the 32nd dictionary key/value pair
+                catch (Exception)
+                {
                     continue;
                 }
             }
-            foreach(KeyValuePair<Category, double> keyPair in categoricalFrequency)
+
+            foreach (Category c in Enum.GetValues(typeof(Category)))
             {
-                categoricalFrequency[keyPair.Key] = keyPair.Value / totalCharCount;
-                
+                if (totalCharCount > 0)
+                {
+                    categoricalFrequency[c] /= totalCharCount;
+                } else
+                {
+                    categoricalFrequency[c] = 0.0;
+                }
             }
+
 
             return categoricalFrequency;
         }
@@ -153,43 +168,58 @@ namespace GPC_BOM.Heuristics
             Dictionary<int, int> f = new Dictionary<int, int>();
             var totalCharCount = f.Sum(kp => kp.Value);
 
-            for(int i = 0; i < input.Count(); i++)
+            for (int i = 0; i < input.Count(); i++)
             {
-                try {
-                    if (i == 32) {
+                try
+                {
+                    if (i == 32)
+                    {
                         categoricalFrequency[Category.Space] += input.ElementAt(i);
                     }
-                    if (i == 44) {
+                    if (i == 44)
+                    {
                         categoricalFrequency[Category.Comma] += input.ElementAt(i);
                     }
-                    if (i >= 32 && i <= 47) {
+                    if (i >= 32 && i <= 47)
+                    {
                         categoricalFrequency[Category.Punctuation]++;
                     }
 
                     // Numbers
-                    if (i >= 48 && i <= 57) {
+                    if (i >= 48 && i <= 57)
+                    {
                         categoricalFrequency[Category.Numbers] += input.ElementAt(i);
                     }
 
                     // Uppercase Characters && Lowercase Characters
-                    if (i >= 65) {
-                        if (i <= 90) {
+                    if (i >= 65)
+                    {
+                        if (i <= 90)
+                        {
                             categoricalFrequency[Category.Uppercase] += input.ElementAt(i);
                         }
-                        else if (i <= 122) {
+                        else if (i <= 122)
+                        {
                             categoricalFrequency[Category.Lowercase] += input.ElementAt(i);
                         }
                     }
                 }
-                catch (Exception) {
-                    // Every time it hits 32, it gets an exception here as well
+                catch (Exception)
+                {
                     continue;
                 }
             }
-            foreach (KeyValuePair<Category, double> keyPair in categoricalFrequency)
-            {
-                categoricalFrequency[keyPair.Key] = keyPair.Value / totalCharCount;
 
+            foreach (Category c in Enum.GetValues(typeof(Category)))
+            {
+                if (totalCharCount > 0)
+                {
+                    categoricalFrequency[c] /= totalCharCount;
+                }
+                else
+                {
+                    categoricalFrequency[c] = 0.0;
+                }
             }
 
             return categoricalFrequency;

@@ -29,7 +29,8 @@ namespace GPC_BOM.Heuristics
             }
             else
             {
-                return new Classifier();
+                instance = new Classifier();
+                return instance;
             }
         }
 

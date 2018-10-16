@@ -112,7 +112,7 @@ namespace GPC_BOM.Heuristics
                     }
                     if (keyPair.Key >= 32 && keyPair.Key <= 47)
                     {
-                        categoricalFrequency[Category.Punctuation]++;
+                        categoricalFrequency[Category.Punctuation] += keyPair.Value;
                     }
 
                     // Numbers
@@ -182,7 +182,7 @@ namespace GPC_BOM.Heuristics
                     }
                     if (i >= 32 && i <= 47)
                     {
-                        categoricalFrequency[Category.Punctuation]++;
+                        categoricalFrequency[Category.Punctuation] += input.ElementAt(i);
                     }
 
                     // Numbers

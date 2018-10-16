@@ -145,7 +145,8 @@ namespace GPC_BOM.Heuristics
                 if (totalCharCount > 0)
                 {
                     categoricalFrequency[c] /= totalCharCount;
-                } else
+                }
+                else
                 {
                     categoricalFrequency[c] = 0.0;
                 }
@@ -165,8 +166,7 @@ namespace GPC_BOM.Heuristics
                 categoricalFrequency.Add(c, 0);
             }
 
-            Dictionary<int, int> f = new Dictionary<int, int>();
-            var totalCharCount = f.Sum(kp => kp.Value);
+            var totalCharCount = input.Sum(d => d);
 
             for (int i = 0; i < input.Count(); i++)
             {

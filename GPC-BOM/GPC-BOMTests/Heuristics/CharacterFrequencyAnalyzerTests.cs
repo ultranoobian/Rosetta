@@ -114,10 +114,57 @@ namespace GPC_BOM.Heuristics.Tests
         }
 
         [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_Double_SingleSetZero()
+        {
+            List<double> input = new List<double>();
+            for (int i = 0; i < 128; i++)
+            {
+                input.Add(0.0d);
+            }
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.IsTrue(result.All(e => e.Value == 0));
+        }
+
+    
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_Double_SingleSet_Digits()
+        {
+            List<double> input = new List<double>();
+            for (int i = 0; i < 128; i++)
+            {
+                input.Add(0.0d);
+            }
+            for(int i = 48; i <= 57; i++)
+            {
+                input[i] = 1.0d;
+            }
+
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[CharacterFrequencyAnalyzer.Category.Numbers]);
+        }
+
+        [TestMethod()]
         public void CalculateRelativeAggregateFrequencyAnalyze_String_EmptySetZero()
         {
             var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(new List<string>());
             Assert.IsTrue(result.All(e => e.Value == 0));
         }
+
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_String_SingleSetZero()
+        {
+            List<string> input = new List<string>() { "" };
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.IsTrue(result.All(e => e.Value == 0));
+        }
+
+        [TestMethod()]
+        public void CalculateRelativeAggregateFrequencyAnalyze_String_SingleSet_Digits()
+        {
+            List<string> input = new List<string>() { "0123456789" };
+            var result = Heuristics.CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Assert.AreEqual(1, result[CharacterFrequencyAnalyzer.Category.Numbers]);
+        }
+
     }
 }

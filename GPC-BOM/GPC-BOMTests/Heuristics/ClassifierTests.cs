@@ -11,22 +11,21 @@ namespace GPC_BOM.Heuristics.Tests
     [TestClass()]
     public class ClassifierTests
     {
-        [TestMethod()]
-        public void GetInstanceAnalyze_EmptySetZero()
+
+        public static void LoadFrequencyValues(Classifier classifier)
         {
             throw new NotImplementedException();
         }
 
         [TestMethod()]
-        public void AddFrequencyValueAnalyze_EmptySetZero()
+        public void GetInstance_NewInstance()
         {
-            throw new NotImplementedException();
-        }
+            Classifier clf = Classifier.GetInstance();
+            Assert.IsNotNull(clf);
 
-        [TestMethod()]
-        public void AddFrequencyValueAnalyze_EmptySetZero1()
-        {
-            throw new NotImplementedException();
+            Classifier clf2 = Classifier.GetInstance();
+            Assert.IsNotNull(clf);
+            Assert.AreSame(clf, clf2);
         }
 
         [TestMethod()]
@@ -36,6 +35,23 @@ namespace GPC_BOM.Heuristics.Tests
             PrivateObject privateObject = new PrivateObject(clf);
             var a = (List<List<double>>)privateObject.GetField("qtyClassifierValues");
             int i = a.Count;
+        }
+
+        [TestMethod()]
+        public void ClassificationTest_Classify_Quantity()
+        {
+            const Classifier.ColumnType testColumn = Classifier.ColumnType.Quantity;
+            Classifier clf = Classifier.GetInstance();
+            Assert.IsNotNull(clf);
+
+            LoadFrequencyValues(clf);
+
+            var result = clf.Classify(new List<string>()
+            {
+                "1", "2", "3", "4", "5" ,"6"
+            });
+
+            Assert.AreEqual(testColumn, result);
         }
     }
 }

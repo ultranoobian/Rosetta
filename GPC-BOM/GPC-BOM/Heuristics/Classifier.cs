@@ -125,6 +125,25 @@ namespace GPC_BOM.Heuristics
             }).Sum();
         }
 
+        public ColumnType Classify_KNN(IEnumerable<string> input, int kNDegree)
+        {
+            Dictionary<ColumnType, int> kDegrees = new Dictionary<ColumnType, int>();
+            foreach(ColumnType e in Enum.GetValues(typeof(ColumnType)))
+            {
+                kDegrees.Add(e, 0);
+            }
+
+            List<HeuristicTuple> result = Classify(input);
+            for(int i = 0; i < kNDegree && i < result.Count; i++)
+            {
+                kDegrees[result[i].columnType]++;
+            }
+
+            var s = kDegrees.OrderByDescending(kvp => kvp.Value).First().Key;
+            return s;
+        }
+
+
         public class HeuristicTuple : IComparable<HeuristicTuple>
         {
             public readonly ColumnType columnType;

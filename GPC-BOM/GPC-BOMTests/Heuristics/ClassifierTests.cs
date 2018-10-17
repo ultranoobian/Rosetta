@@ -128,5 +128,39 @@ namespace GPC_BOM.Heuristics.Tests
             Assert.AreEqual(testColumn, result.Min().columnType);
             Assert.IsTrue(result.Count > 1);
         }
+
+        [TestMethod()]
+        public void ClassificationTest_Classify_kNN_3_PartNumber()
+        {
+            const Classifier.ColumnType testColumn = Classifier.ColumnType.PartNumber;
+            Classifier clf = Classifier.GetInstance();
+            Assert.IsNotNull(clf);
+
+            LoadFrequencyValues(clf);
+
+            var result = clf.Classify_KNN(new List<string>()
+            {
+                "C1608X7R1E105K080AB", "MC0805N100J201CT", "GRM2165C2A471JA01D", "VS-15MQ040NPBF", "EMVA250ADA101MF80G" ,"251R15S221JV4E"
+            }, 3);
+
+            Assert.AreEqual(testColumn, result);
+        }
+
+        [TestMethod()]
+        public void ClassificationTest_Classify_kNN_5_PartNumber()
+        {
+            const Classifier.ColumnType testColumn = Classifier.ColumnType.PartNumber;
+            Classifier clf = Classifier.GetInstance();
+            Assert.IsNotNull(clf);
+
+            LoadFrequencyValues(clf);
+
+            var result = clf.Classify_KNN(new List<string>()
+            {
+                "C1608X7R1E105K080AB", "MC0805N100J201CT", "GRM2165C2A471JA01D", "VS-15MQ040NPBF", "EMVA250ADA101MF80G" ,"251R15S221JV4E"
+            }, 3);
+
+            Assert.AreEqual(testColumn, result);
+        }
     }
 }

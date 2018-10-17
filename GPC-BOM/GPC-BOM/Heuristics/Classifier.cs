@@ -69,47 +69,67 @@ namespace GPC_BOM.Heuristics
             }
         }
 
-        public Dictionary<ColumnType, double> Classify(IEnumerable<string> input)
+        public List<HeuristicTuple> Classify(IEnumerable<string> input)
         {
             Dictionary<CharacterFrequencyAnalyzer.Category, double> classifyingInput = CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
-            Dictionary<ColumnType, double> calculatedDelta = new Dictionary<ColumnType, double>();
+            List<HeuristicTuple> calculatedDeltas = new List<HeuristicTuple>();
 
             try
             {
                 foreach (List<double> trainingData in qtyClassifierValues)
                 {
-                    calculatedDelta.Add(ColumnType.Quantity, CalculateHeuristicValue(classifyingInput, trainingData));
+                    calculatedDeltas.Add(new HeuristicTuple(ColumnType.Quantity, CalculateHeuristicValue(classifyingInput, trainingData)));
                 }
                 foreach (List<double> trainingData in designatorClassifierValues)
                 {
-                    calculatedDelta.Add(ColumnType.Designator, CalculateHeuristicValue(classifyingInput, trainingData));
+                    calculatedDeltas.Add(new HeuristicTuple(ColumnType.Designator, CalculateHeuristicValue(classifyingInput, trainingData)));
                 }
                 foreach (List<double> trainingData in descriptionClassifierValues)
                 {
-                    calculatedDelta.Add(ColumnType.Description, CalculateHeuristicValue(classifyingInput, trainingData));
+                    calculatedDeltas.Add(new HeuristicTuple(ColumnType.Description, CalculateHeuristicValue(classifyingInput, trainingData)));
                 }
                 foreach (List<double> trainingData in mfgClassifierValues)
                 {
-                    calculatedDelta.Add(ColumnType.Manufacturer, CalculateHeuristicValue(classifyingInput, trainingData));
+                    calculatedDeltas.Add(new HeuristicTuple(ColumnType.Manufacturer, CalculateHeuristicValue(classifyingInput, trainingData)));
                 }
                 foreach (List<double> trainingData in mpnClassifierValues)
                 {
-                    calculatedDelta.Add(ColumnType.PartNumber, CalculateHeuristicValue(classifyingInput, trainingData));
+                    calculatedDeltas.Add(new HeuristicTuple(ColumnType.PartNumber, CalculateHeuristicValue(classifyingInput, trainingData)));
                 }
+
+                calculatedDeltas.Sort();
             }
+
             catch (Exception)
             {
                 throw;
             }
-            return calculatedDelta;
+            return calculatedDeltas;
         }
 
         private static double CalculateHeuristicValue(Dictionary<CharacterFrequencyAnalyzer.Category, double> a, List<double> n)
         {
             return a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) =>
             {
-                return (Math.Pow((b.Value - c.Value), 2) / c.Value);
+                return (Math.Pow((b.Value - c.Value), 2));
             }).Sum();
+        }
+
+        public class HeuristicTuple : IComparable<HeuristicTuple>
+        {
+            public readonly ColumnType columnType;
+            public readonly double heuristicValue;
+
+            internal HeuristicTuple(ColumnType columnType, double heuristicValue)
+            {
+                this.columnType = columnType;
+                this.heuristicValue = heuristicValue;
+            }
+
+            public int CompareTo(HeuristicTuple other)
+            {
+                return this.heuristicValue.CompareTo(other.heuristicValue);
+            }
         }
     }
 }

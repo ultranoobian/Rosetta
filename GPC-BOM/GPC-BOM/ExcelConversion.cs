@@ -345,20 +345,20 @@ namespace GPC_BOM {
                         string[] tempArray = genArray.OfType<object>().Select(o => o.ToString()).ToArray();
 
                         // Classify the current column
-                        Dictionary<Heuristics.Classifier.ColumnType, double> heuristicsColumnType = heuristics_classifier.Classify(tempArray);
+                        List<Heuristics.Classifier.HeuristicTuple> heuristicsColumnType = heuristics_classifier.Classify(tempArray);
 
                         // Determine whether a column belongs to a specific type
-                        switch (heuristicsColumnType.Min().Key) {
+                        switch (heuristicsColumnType.Min().columnType) {
                             case Heuristics.Classifier.ColumnType.Quantity:
                                 if (!quantityHeuristic.HasValue) {
                                     // First time a column has been predicted to be 'quantity'
-                                    Debug.WriteLine(heuristicsColumnType.Min().Value.ToString());
-                                    quantityHeuristic = Convert.ToDouble(heuristicsColumnType.Min().Value.ToString());
+                                    Debug.WriteLine(heuristicsColumnType.Min().heuristicValue.ToString());
+                                    quantityHeuristic = Convert.ToDouble(heuristicsColumnType.Min().heuristicValue.ToString());
                                     quantity_column = i;
                                 }
-                                else if (heuristicsColumnType.Min().Value < quantityHeuristic) {
+                                else if (heuristicsColumnType.Min().heuristicValue < quantityHeuristic) {
                                     // Not the first time, but this one seems more likely
-                                    quantityHeuristic = heuristicsColumnType.Min().Value;
+                                    quantityHeuristic = heuristicsColumnType.Min().heuristicValue;
                                     quantity_column = i;
                                 }
                                 if (!quantity_row.HasValue) {
@@ -369,12 +369,12 @@ namespace GPC_BOM {
                             case Heuristics.Classifier.ColumnType.Description:
                                 if (!descriptionHeuristic.HasValue) {
                                     // First time a column has been predicted to be 'description'
-                                    descriptionHeuristic = (double)heuristicsColumnType.Min().Value;
+                                    descriptionHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
                                     description_column = i;
                                 }
-                                else if (heuristicsColumnType.Min().Value < descriptionHeuristic) {
+                                else if (heuristicsColumnType.Min().heuristicValue < descriptionHeuristic) {
                                     // Not the first time, but this one seems more likely
-                                    descriptionHeuristic = heuristicsColumnType.Min().Value;
+                                    descriptionHeuristic = heuristicsColumnType.Min().heuristicValue;
                                     description_column = i;
                                 }
                                 if (!description_row.HasValue) {
@@ -385,12 +385,12 @@ namespace GPC_BOM {
                             case Heuristics.Classifier.ColumnType.PartNumber:
                                 if (!mpnHeuristic.HasValue) {
                                     // First time a column has been predicted to be 'mpn'
-                                    mpnHeuristic = (double)heuristicsColumnType.Min().Value;
+                                    mpnHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
                                     mpn_column = i;
                                 }
-                                else if (heuristicsColumnType.Min().Value < mpnHeuristic) {
+                                else if (heuristicsColumnType.Min().heuristicValue < mpnHeuristic) {
                                     // Not the first time, but this one seems more likely
-                                    mpnHeuristic = heuristicsColumnType.Min().Value;
+                                    mpnHeuristic = heuristicsColumnType.Min().heuristicValue;
                                     mpn_column = i;
                                 }
                                 if (!mpn_row.HasValue) {
@@ -401,12 +401,12 @@ namespace GPC_BOM {
                             case Heuristics.Classifier.ColumnType.Designator:
                                 if (!designatorHeuristic.HasValue) {
                                     // First time a column has been predicted to be 'designator'
-                                    designatorHeuristic = (double)heuristicsColumnType.Min().Value;
+                                    designatorHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
                                     designator_column = i;
                                 }
-                                else if (heuristicsColumnType.Min().Value < designatorHeuristic) {
+                                else if (heuristicsColumnType.Min().heuristicValue < designatorHeuristic) {
                                     // Not the first time, but this one seems more likely
-                                    designatorHeuristic = heuristicsColumnType.Min().Value;
+                                    designatorHeuristic = heuristicsColumnType.Min().heuristicValue;
                                     designator_column = i;
                                 }
                                 if (!designator_row.HasValue) {
@@ -417,12 +417,12 @@ namespace GPC_BOM {
                             case Heuristics.Classifier.ColumnType.Manufacturer:
                                 if (!manufacturerHeuristic.HasValue) {
                                     // First time a column has been predicted to be 'manufacturer'
-                                    manufacturerHeuristic = (double)heuristicsColumnType.Min().Value;
+                                    manufacturerHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
                                     manufacturer_column = i;
                                 }
-                                else if (heuristicsColumnType.Min().Value < manufacturerHeuristic) {
+                                else if (heuristicsColumnType.Min().heuristicValue < manufacturerHeuristic) {
                                     // Not the first time, but this one seems more likely
-                                    manufacturerHeuristic = heuristicsColumnType.Min().Value;
+                                    manufacturerHeuristic = heuristicsColumnType.Min().heuristicValue;
                                     manufacturer_column = i;
                                 }
                                 if (!manufacturer_row.HasValue) {

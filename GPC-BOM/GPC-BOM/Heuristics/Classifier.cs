@@ -99,6 +99,7 @@ namespace GPC_BOM.Heuristics
             }
             catch (Exception)
             {
+                throw;
             }
             return calculatedDelta;
         }

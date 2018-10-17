@@ -71,8 +71,7 @@ namespace GPC_BOM.Heuristics
 
         public Dictionary<ColumnType, double> Classify(IEnumerable<string> input)
         {
-            //var a = CharacterFrequencyAnalyzer.AggregateCharacterFrequency(input.ToList());
-            var a = CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Dictionary<CharacterFrequencyAnalyzer.Category, double> a = CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
             Dictionary<ColumnType, double> calculatedDelta = new Dictionary<ColumnType, double>();
 
             try {

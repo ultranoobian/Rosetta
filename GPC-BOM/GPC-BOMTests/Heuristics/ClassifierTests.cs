@@ -93,6 +93,7 @@ namespace GPC_BOM.Heuristics.Tests
             });
 
             Assert.AreEqual(testColumn, result.Min(e => e.Key));
+            Assert.IsTrue(result.Count > 1);
         }
     }
 }

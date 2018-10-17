@@ -71,33 +71,30 @@ namespace GPC_BOM.Heuristics
 
         public Dictionary<ColumnType, double> Classify(IEnumerable<string> input)
         {
-            Dictionary<CharacterFrequencyAnalyzer.Category, double> a = CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
+            Dictionary<CharacterFrequencyAnalyzer.Category, double> classifyingInput = CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
             Dictionary<ColumnType, double> calculatedDelta = new Dictionary<ColumnType, double>();
 
             try
             {
-                foreach (List<double> n in qtyClassifierValues)
+                foreach (List<double> trainingData in qtyClassifierValues)
                 {
-                    calculatedDelta.Add(ColumnType.Quantity, CalculateHeuristicValue(a, n));
+                    calculatedDelta.Add(ColumnType.Quantity, CalculateHeuristicValue(classifyingInput, trainingData));
                 }
-                foreach (List<double> n in designatorClassifierValues)
+                foreach (List<double> trainingData in designatorClassifierValues)
                 {
-
-                    calculatedDelta.Add(ColumnType.Designator, CalculateHeuristicValue(a, n));
+                    calculatedDelta.Add(ColumnType.Designator, CalculateHeuristicValue(classifyingInput, trainingData));
                 }
-                foreach (List<double> n in descriptionClassifierValues)
+                foreach (List<double> trainingData in descriptionClassifierValues)
                 {
-
-                    calculatedDelta.Add(ColumnType.Description, CalculateHeuristicValue(a, n));
+                    calculatedDelta.Add(ColumnType.Description, CalculateHeuristicValue(classifyingInput, trainingData));
                 }
-                foreach (List<double> n in mfgClassifierValues)
+                foreach (List<double> trainingData in mfgClassifierValues)
                 {
-
-                    calculatedDelta.Add(ColumnType.Manufacturer, CalculateHeuristicValue(a, n));
+                    calculatedDelta.Add(ColumnType.Manufacturer, CalculateHeuristicValue(classifyingInput, trainingData));
                 }
-                foreach (List<double> n in mpnClassifierValues)
+                foreach (List<double> trainingData in mpnClassifierValues)
                 {
-                    calculatedDelta.Add(ColumnType.PartNumber, CalculateHeuristicValue(a, n));
+                    calculatedDelta.Add(ColumnType.PartNumber, CalculateHeuristicValue(classifyingInput, trainingData));
                 }
             }
             catch (Exception)

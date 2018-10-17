@@ -74,48 +74,44 @@ namespace GPC_BOM.Heuristics
             Dictionary<CharacterFrequencyAnalyzer.Category, double> a = CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
             Dictionary<ColumnType, double> calculatedDelta = new Dictionary<ColumnType, double>();
 
-            try {
-                foreach (List<double> n in qtyClassifierValues) {
-                    //var result = a.Zip(CharacterFrequencyAnalyzer.AggregateCharacterFrequency(n), (b, c) => c - b);
-                    double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) => {
-                        return (Math.Pow((b.Value - c.Value), 2) / c.Value);
-                    }).Sum();
-
-                    calculatedDelta.Add(ColumnType.Quantity, result);
-
+            try
+            {
+                foreach (List<double> n in qtyClassifierValues)
+                {
+                    calculatedDelta.Add(ColumnType.Quantity, CalculateHeuristicValue(a, n));
                 }
-                foreach (List<double> n in designatorClassifierValues) {
-                    double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) => {
-                        return (Math.Pow((b.Value - c.Value), 2) / c.Value);
-                    }).Sum();
+                foreach (List<double> n in designatorClassifierValues)
+                {
 
-                    calculatedDelta.Add(ColumnType.Designator, result);
+                    calculatedDelta.Add(ColumnType.Designator, CalculateHeuristicValue(a, n));
                 }
-                foreach (List<double> n in descriptionClassifierValues) {
-                    double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) => {
-                        return (Math.Pow((b.Value - c.Value), 2) / c.Value);
-                    }).Sum();
+                foreach (List<double> n in descriptionClassifierValues)
+                {
 
-                    calculatedDelta.Add(ColumnType.Description, result);
+                    calculatedDelta.Add(ColumnType.Description, CalculateHeuristicValue(a, n));
                 }
-                foreach (List<double> n in mfgClassifierValues) {
-                    double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) => {
-                        return (Math.Pow((b.Value - c.Value), 2) / c.Value);
-                    }).Sum();
+                foreach (List<double> n in mfgClassifierValues)
+                {
 
-                    calculatedDelta.Add(ColumnType.Manufacturer, result);
+                    calculatedDelta.Add(ColumnType.Manufacturer, CalculateHeuristicValue(a, n));
                 }
-                foreach (List<double> n in mpnClassifierValues) {
-                    double result = a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) => {
-                        return (Math.Pow((b.Value - c.Value), 2) / c.Value);
-                    }).Sum();
-
-                    calculatedDelta.Add(ColumnType.PartNumber, result);
+                foreach (List<double> n in mpnClassifierValues)
+                {
+                    calculatedDelta.Add(ColumnType.PartNumber, CalculateHeuristicValue(a, n));
                 }
             }
-            catch (Exception) {
+            catch (Exception)
+            {
             }
             return calculatedDelta;
+        }
+
+        private static double CalculateHeuristicValue(Dictionary<CharacterFrequencyAnalyzer.Category, double> a, List<double> n)
+        {
+            return a.Zip(CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(n), (b, c) =>
+            {
+                return (Math.Pow((b.Value - c.Value), 2) / c.Value);
+            }).Sum();
         }
     }
 }

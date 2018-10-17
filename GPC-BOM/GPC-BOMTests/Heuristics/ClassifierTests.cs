@@ -36,7 +36,7 @@ namespace GPC_BOM.Heuristics.Tests
                         case "designator":
                             classifier.AddFrequencyValue(Classifier.ColumnType.Designator, frequencyValues);
                             break;
-                        case "manufactuer":
+                        case "manufacturer":
                             classifier.AddFrequencyValue(Classifier.ColumnType.Manufacturer, frequencyValues);
                             break;
                         case "mpn":

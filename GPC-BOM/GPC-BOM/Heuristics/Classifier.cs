@@ -71,6 +71,16 @@ namespace GPC_BOM.Heuristics
 
         public List<HeuristicTuple> Classify(IEnumerable<string> input)
         {
+            // Check if there are available training values to use for classifcation, otherwise throw InvalidOperationException.
+            if (new List<List<List<double>>>()
+            {
+                qtyClassifierValues,designatorClassifierValues, descriptionClassifierValues,mfgClassifierValues,mpnClassifierValues
+            }.All(list => list.Count == 0))
+            {
+                throw new InvalidOperationException("No training data has been loaded to allow for classification to occur");
+            }
+
+
             Dictionary<CharacterFrequencyAnalyzer.Category, double> classifyingInput = CharacterFrequencyAnalyzer.CalculateRelativeAggregateFrequency(input);
             List<HeuristicTuple> calculatedDeltas = new List<HeuristicTuple>();
 
@@ -100,7 +110,7 @@ namespace GPC_BOM.Heuristics
                 calculatedDeltas.Sort();
             }
 
-            catch (Exception)
+            catch
             {
                 throw;
             }

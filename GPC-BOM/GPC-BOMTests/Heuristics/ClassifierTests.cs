@@ -59,7 +59,6 @@ namespace GPC_BOM.Heuristics.Tests
         }
 
         [TestMethod()]
-        [ExpectedException(typeof (InvalidOperationException))]
         public void GetInstance_NewInstance()
         {
             Classifier clf = Classifier.GetInstance();
@@ -71,6 +70,7 @@ namespace GPC_BOM.Heuristics.Tests
         }
 
         [TestMethod()]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void Classifier_NoData_ThrownException()
         {
             Classifier clf = Classifier.GetInstance();
@@ -81,6 +81,7 @@ namespace GPC_BOM.Heuristics.Tests
             {
                 "SomeDataHere"
             };
+            clf.Classify(input);
         }
 
         [TestMethod()]

@@ -74,6 +74,19 @@ namespace GPC_BOM.Heuristics.Tests
         public void Classifier_NoData_ThrownException()
         {
             Classifier clf = Classifier.GetInstance();
+
+            /*
+             *  The following code ensures that the Classifier singleton is reduced back to the original state before intialization.
+             *  Failure to do so when running multiple tests involving the Classifier singleton will result in a indeterminate state whilst testing
+             *  
+            */
+
+            PrivateObject privateObject = new PrivateObject(clf);
+            privateObject.SetField("qtyClassifierValues", new List<List<double>>());
+            privateObject.SetField("designatorClassifierValues", new List<List<double>>());
+            privateObject.SetField("descriptionClassifierValues", new List<List<double>>());
+            privateObject.SetField("mfgClassifierValues", new List<List<double>>());
+            privateObject.SetField("mpnClassifierValues", new List<List<double>>());
             Assert.IsNotNull(clf);
 
 

@@ -44,16 +44,16 @@ namespace GPC_BOM.Heuristics
                         qtyClassifierValues.Add(input);
                         break;
                     case ColumnType.Description:
-                        qtyClassifierValues.Add(input);
+                        descriptionClassifierValues.Add(input);
                         break;
                     case ColumnType.Manufacturer:
-                        qtyClassifierValues.Add(input);
+                        mfgClassifierValues.Add(input);
                         break;
                     case ColumnType.PartNumber:
-                        qtyClassifierValues.Add(input);
+                        mpnClassifierValues.Add(input);
                         break;
                     case ColumnType.Designator:
-                        qtyClassifierValues.Add(input);
+                        designatorClassifierValues.Add(input);
                         break;
                     default:
                         break;

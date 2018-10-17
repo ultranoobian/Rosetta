@@ -107,7 +107,7 @@ namespace GPC_BOM.Heuristics.Tests
 
             var result = clf.Classify(new List<string>()
             {
-                "C1608X7R1E105K080AB", "MC0805N100J201CT", "GRM2165C2A471JA01D", "DC10B", "EMVA250ADA101MF80G" ,"251R15S221JV4E"
+                "C1608X7R1E105K080AB", "MC0805N100J201CT", "GRM2165C2A471JA01D", "VS-15MQ040NPBF", "EMVA250ADA101MF80G" ,"251R15S221JV4E"
             });
 
             Assert.AreEqual(testColumn, result.Min().columnType);

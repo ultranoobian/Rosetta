@@ -95,5 +95,23 @@ namespace GPC_BOM.Heuristics.Tests
             Assert.AreEqual(testColumn, result.Min().columnType);
             Assert.IsTrue(result.Count > 1);
         }
+
+        [TestMethod()]
+        public void ClassificationTest_Classify_MPN()
+        {
+            const Classifier.ColumnType testColumn = Classifier.ColumnType.PartNumber;
+            Classifier clf = Classifier.GetInstance();
+            Assert.IsNotNull(clf);
+
+            LoadFrequencyValues(clf);
+
+            var result = clf.Classify(new List<string>()
+            {
+                "C1608X7R1E105K080AB", "MC0805N100J201CT", "GRM2165C2A471JA01D", "DC10B", "EMVA250ADA101MF80G" ,"251R15S221JV4E"
+            });
+
+            Assert.AreEqual(testColumn, result.Min().columnType);
+            Assert.IsTrue(result.Count > 1);
+        }
     }
 }

@@ -894,7 +894,7 @@ namespace GPC_BOM {
                             }
                             else {
                                 // Web scraping time!
-                                string result = tryWebScrape(mpnValue);
+                                string result = tryWebScrape(mainApp, mpnValue);
                                 if (string.IsNullOrEmpty(result) || string.IsNullOrWhiteSpace(result)) {
                                     // Couldn't find anything via web search
                                     writeCell(oWorksheet2, i, description_quotewin_single_column, dataMissingMessage);
@@ -928,7 +928,7 @@ namespace GPC_BOM {
                             }
                             else {
                                 // Web scraping time!
-                                string result = tryWebScrape(mpnValue);
+                                string result = tryWebScrape(mainApp, mpnValue);
                                 if (string.IsNullOrEmpty(result) || string.IsNullOrWhiteSpace(result)) {
                                     // Couldn't find anything via web search
                                     writeCell(oWorksheet2, i, description_quotewin_multi_column, dataMissingMessage);
@@ -964,7 +964,7 @@ namespace GPC_BOM {
                             }
                             else {
                                 // Web scraping time!
-                                string result = tryWebScrape(mpnValue);
+                                string result = tryWebScrape(mainApp, mpnValue);
                                 if (string.IsNullOrEmpty(result) || string.IsNullOrWhiteSpace(result)) {
                                     // Couldn't find anything via web search
                                     writeCell(oWorksheet2, i, description_sap_column, dataMissingMessage);
@@ -1056,7 +1056,7 @@ namespace GPC_BOM {
             }
         }
 
-        private string tryWebScrape(string searchTerm) {
+        private string tryWebScrape(frmMain mainApp, string searchTerm) {
             // Blank string as default
             string result = "";
 
@@ -1076,15 +1076,19 @@ namespace GPC_BOM {
                 if (string.IsNullOrEmpty(result)) {
                     switch (webOrder[i]) {
                         case "NaiveDigikey":
+                            mainApp.statusUpdate2("(Checking for missing fields via Digikey (15s timeout))");
                             result = NaiveDigikey(searchTerm);
                             break;
                         case "NaiveMouser":
+                            mainApp.statusUpdate2("(Checking for missing fields via Mouser (15s timeout))");
                             result = NaiveMouser(searchTerm);
                             break;
                         case "NaiveElement14":
+                            mainApp.statusUpdate2("(Checking for missing fields via Element14 (15s timeout))");
                             result = NaiveElement14(searchTerm);
                             break;
                         case "NaiveRS":
+                            mainApp.statusUpdate2("(Checking for missing fields via RS Components (15s timeout))");
                             result = NaiveRS(searchTerm);
                             break;
                     }
@@ -1098,23 +1102,39 @@ namespace GPC_BOM {
 
         private string NaiveDigikey(string searchTerm) {
             string retVal = "";
-            retVal = Webscraper.NaiveDigikey(searchTerm);
-            return retVal;
+            var task = Task.Run(() => Webscraper.NaiveDigikey(searchTerm));
+            if (task.Wait(TimeSpan.FromSeconds(15)))
+                return task.Result.ToString();
+            else
+                Debug.WriteLine("Digikey timed out.");
+                return retVal;            
         }
         private string NaiveMouser(string searchTerm) {
             string retVal = "";
-            retVal = Webscraper.NaiveMouser(searchTerm);
-            return retVal;
+            var task = Task.Run(() => Webscraper.NaiveMouser(searchTerm));
+            if (task.Wait(TimeSpan.FromSeconds(15)))
+                return task.Result.ToString();
+            else
+                Debug.WriteLine("Mouser timed out.");
+            return retVal;            
         }
         private string NaiveElement14(string searchTerm) {
             string retVal = "";
-            retVal = Webscraper.NaiveElement14(searchTerm);
-            return retVal;
+            var task = Task.Run(() => Webscraper.NaiveElement14(searchTerm));
+            if (task.Wait(TimeSpan.FromSeconds(15)))
+                return task.Result.ToString();
+            else
+                Debug.WriteLine("Element14 timed out.");
+            return retVal;            
         }
         private string NaiveRS(string searchTerm) {
             string retVal = "";
-            retVal = Webscraper.NaiveRS(searchTerm);
-            return retVal;
+            var task = Task.Run(() => Webscraper.NaiveRS(searchTerm));
+            if (task.Wait(TimeSpan.FromSeconds(15)))
+                return task.Result.ToString();
+            else
+                Debug.WriteLine("RS Components timed out.");
+            return retVal;            
         }
     }
 }

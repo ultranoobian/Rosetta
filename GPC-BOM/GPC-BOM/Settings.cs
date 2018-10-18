@@ -104,6 +104,19 @@ namespace GPC_BOM {
                         break;
                 }
             }
+            // Retrieve timeout setting
+            this.numWebTimeout.Value = (int)Properties.Settings.Default.webTimeout;
+
+            // Retrieve preferred search value
+            if (Properties.Settings.Default.preferredSearchType.ToString().Equals("Heuristic1")) {
+                this.cbPreferredMode.SelectedIndex = 1;
+            }
+            else if (Properties.Settings.Default.preferredSearchType.ToString().Equals("Heuristic2")) {
+                this.cbPreferredMode.SelectedIndex = 2;
+            }
+            else {
+                this.cbPreferredMode.SelectedIndex = 0;
+            }
 
             #endregion
         }
@@ -238,6 +251,19 @@ namespace GPC_BOM {
                 case 4:
                     Properties.Settings.Default.webOrder4 = "NaiveRS";
                     break;
+            }
+            // Save timeout value
+            Properties.Settings.Default.webTimeout = (int)this.numWebTimeout.Value;
+
+            // Save preferred search mechanism
+            if (this.cbPreferredMode.SelectedIndex.Equals(0)) {
+                Properties.Settings.Default.preferredSearchType = "Excel";
+            }
+            else if (this.cbPreferredMode.SelectedIndex.Equals(1)) {
+                Properties.Settings.Default.preferredSearchType = "Heuristic1";
+            }
+            else if (this.cbPreferredMode.SelectedIndex.Equals(2)) {
+                Properties.Settings.Default.preferredSearchType = "Heuristic2";
             }
 
             // Save central setting store to file, refresh

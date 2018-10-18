@@ -250,5 +250,29 @@ namespace GPC_BOM.Properties {
                 this["webOrder4"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15")]
+        public int webTimeout {
+            get {
+                return ((int)(this["webTimeout"]));
+            }
+            set {
+                this["webTimeout"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Heuristic2")]
+        public string preferredSearchType {
+            get {
+                return ((string)(this["preferredSearchType"]));
+            }
+            set {
+                this["preferredSearchType"] = value;
+            }
+        }
     }
 }

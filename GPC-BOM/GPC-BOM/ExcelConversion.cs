@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
@@ -142,7 +143,6 @@ namespace GPC_BOM {
                 mainApp.statusUpdate2("(Opening Excel document)");
                 oWorkbook = oExcel.Workbooks.Open(excelFile);
                 // This sets the variable as the active sheet - this may need to change if iterating through multiple sheets
-                // Heuristics!!!
                 oWorksheet = oWorkbook.ActiveSheet;
                 Debug.WriteLine("Processing file...");
 
@@ -217,245 +217,21 @@ namespace GPC_BOM {
 
                 mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
-                // Do a basic search first to fill in the non-heuristics row/col numbers
-                #region Basic Search - Find column headers
-                
-                mainApp.statusUpdate2("(Searching for column headers)");
-                Excel.Range searchRange = oExcel.get_Range(headerRow.ToString() + ":" + headerRow.ToString(), Type.Missing);
-
-                // Find Level
-                foreach (string item in Properties.Settings.Default.cLevel) {
-                    Excel.Range locationFound = searchRange.Find(item);
-                    if (locationFound != null) {
-                        // Once we get a match, break out of loop
-                        level_column = locationFound.Column;
-                        // Only get the data
-                        level_row = locationFound.Row + 1;
+                // Do a combination of search types: one is always the basic Excel search, the other is heuristics based
+                string preferredSearch = Properties.Settings.Default.preferredSearchType;
+                switch (preferredSearch) {
+                    case "Excel":
+                        basicSearch(mainApp, oExcel, headerRow);
                         break;
-                    }
-                }
-
-                // Find CPN
-                foreach (string item in Properties.Settings.Default.cCPN) {
-                    Excel.Range locationFound = searchRange.Find(item);
-                    if (locationFound != null) {
-                        // Once we get a match, break out of loop
-                        cpn_column = locationFound.Column;
-                        cpn_row = locationFound.Row + 1;
-                    }
-                }
-
-                // Find Description
-                foreach (string item in Properties.Settings.Default.cDescription) {
-                    Excel.Range locationFound = searchRange.Find(item);
-                    if (locationFound != null) {
-                        // Once we get a match, break out of loop
-                        description_column = locationFound.Column;
-                        description_row = locationFound.Row + 1;
+                    case "Heuristic1":
+                        basicSearch(mainApp, oExcel, headerRow);
+                        heuristicSearch(mainApp, oExcel, oWorksheet, heuristics_classifier, headerRow);
                         break;
-                    }
-                }
-
-                // Find Quantity
-                foreach (string item in Properties.Settings.Default.cQuantity) {
-                    Excel.Range locationFound = searchRange.Find(item);
-                    if (locationFound != null) {
-                        // Once we get a match, break out of loop
-                        quantity_column = locationFound.Column;
-                        quantity_row = locationFound.Row + 1;
+                    case "Heuristic2":
+                        basicSearch(mainApp, oExcel, headerRow);
+                        heuristicSearch2(mainApp, oExcel, oWorksheet, heuristics_classifier, headerRow);
                         break;
-                    }
                 }
-
-                // Find Designator
-                foreach (string item in Properties.Settings.Default.cDesignator) {
-                    Excel.Range locationFound = searchRange.Find(item);
-                    if (locationFound != null) {
-                        // Once we get a match, break out of loop
-                        designator_column = locationFound.Column;
-                        designator_row = locationFound.Row + 1;
-                        break;
-                    }
-                }
-
-                // Find Manufacturer
-                foreach (string item in Properties.Settings.Default.cManufacturer) {
-                    Excel.Range locationFound = searchRange.Find(item);
-                    if (locationFound != null) {
-                        // Once we get a match, break out of loop
-                        manufacturer_column = locationFound.Column;
-                        manufacturer_row = locationFound.Row + 1;
-                        break;
-                    }
-                }
-
-                // Find MPN
-                foreach (string item in Properties.Settings.Default.cMPN) {
-                    Excel.Range locationFound = searchRange.Find(item);
-                    if (locationFound != null) {
-                        // Once we get a match, break out of loop
-                        mpn_column = locationFound.Column;
-                        mpn_row = locationFound.Row + 1;
-                        break;
-                    }
-                }
-
-                // Find Process
-                foreach (string item in Properties.Settings.Default.cProcess) {
-                    Excel.Range locationFound = searchRange.Find(item);
-                    if (locationFound != null) {
-                        // Once we get a match, break out of loop
-                        process_column = locationFound.Column;
-                        process_row = locationFound.Row + 1;
-                        break;
-                    }
-                }
-
-                // Find Notes
-                foreach (string item in Properties.Settings.Default.cNotes) {
-                    Excel.Range locationFound = searchRange.Find(item);
-                    if (locationFound != null) {
-                        // Once we get a match, break out of loop
-                        notes_column = locationFound.Column;
-                        notes_row = locationFound.Row + 1;
-                        break;
-                    }
-                }
-
-                #endregion
-                // Overwrite col numbers with heuristics
-                #region Heuristics - Find Column Headers
-
-                mainApp.statusUpdate2("(Searching for column headers intelligently)");
-
-                // Use these to store the raw lowest heuristic values
-                double? quantityHeuristic = null;
-                double? descriptionHeuristic = null;
-                double? manufacturerHeuristic = null;
-                double? mpnHeuristic = null;
-                double? designatorHeuristic = null;
-
-                try {
-                    for (int i = 1; i < oWorksheet.UsedRange.Columns.Count + 1; i++) {
-                        // Copy every column sequentially into a temporary array until we find everything we're looking for
-                        Excel.Range temp_start = oWorksheet.Cells[1, i];
-                        Excel.Range temp_end = oWorksheet.Cells[oWorksheet.UsedRange.Rows.Count, i];
-                        Excel.Range temp_range = (Excel.Range)oWorksheet.get_Range(temp_start, temp_end);
-                        System.Array genArray = (System.Array)temp_range.Cells.Value2;
-                        string[] tempArray = genArray.OfType<object>().Select(o => o.ToString()).ToArray();
-
-                        // Classify the current column
-                        List<Heuristics.Classifier.HeuristicTuple> heuristicsColumnType = heuristics_classifier.Classify(tempArray);
-
-                        // Determine whether a column belongs to a specific type
-                        switch (heuristicsColumnType.Min().columnType) {
-                            case Heuristics.Classifier.ColumnType.Quantity:
-                                if (!quantityHeuristic.HasValue) {
-                                    // First time a column has been predicted to be 'quantity'
-                                    Debug.WriteLine(heuristicsColumnType.Min().heuristicValue.ToString());
-                                    quantityHeuristic = Convert.ToDouble(heuristicsColumnType.Min().heuristicValue.ToString());
-                                    quantity_column = i;
-                                }
-                                else if (heuristicsColumnType.Min().heuristicValue < quantityHeuristic) {
-                                    // Not the first time, but this one seems more likely
-                                    quantityHeuristic = heuristicsColumnType.Min().heuristicValue;
-                                    quantity_column = i;
-                                }
-                                if (!quantity_row.HasValue) {
-                                    // If the row hasn't already been set, use a default
-                                    quantity_row = 2;
-                                }
-                                break;
-                            case Heuristics.Classifier.ColumnType.Description:
-                                if (!descriptionHeuristic.HasValue) {
-                                    // First time a column has been predicted to be 'description'
-                                    descriptionHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
-                                    description_column = i;
-                                }
-                                else if (heuristicsColumnType.Min().heuristicValue < descriptionHeuristic) {
-                                    // Not the first time, but this one seems more likely
-                                    descriptionHeuristic = heuristicsColumnType.Min().heuristicValue;
-                                    description_column = i;
-                                }
-                                if (!description_row.HasValue) {
-                                    // If the row hasn't already been set, use a default
-                                    description_row = 2;
-                                }
-                                break;
-                            case Heuristics.Classifier.ColumnType.PartNumber:
-                                if (!mpnHeuristic.HasValue) {
-                                    // First time a column has been predicted to be 'mpn'
-                                    mpnHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
-                                    mpn_column = i;
-                                }
-                                else if (heuristicsColumnType.Min().heuristicValue < mpnHeuristic) {
-                                    // Not the first time, but this one seems more likely
-                                    mpnHeuristic = heuristicsColumnType.Min().heuristicValue;
-                                    mpn_column = i;
-                                }
-                                if (!mpn_row.HasValue) {
-                                    // If the row hasn't already been set, use a default
-                                    mpn_row = 2;
-                                }
-                                break;
-                            case Heuristics.Classifier.ColumnType.Designator:
-                                if (!designatorHeuristic.HasValue) {
-                                    // First time a column has been predicted to be 'designator'
-                                    designatorHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
-                                    designator_column = i;
-                                }
-                                else if (heuristicsColumnType.Min().heuristicValue < designatorHeuristic) {
-                                    // Not the first time, but this one seems more likely
-                                    designatorHeuristic = heuristicsColumnType.Min().heuristicValue;
-                                    designator_column = i;
-                                }
-                                if (!designator_row.HasValue) {
-                                    // If the row hasn't already been set, use a default
-                                    designator_row = 2;
-                                }
-                                break;
-                            case Heuristics.Classifier.ColumnType.Manufacturer:
-                                if (!manufacturerHeuristic.HasValue) {
-                                    // First time a column has been predicted to be 'manufacturer'
-                                    manufacturerHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
-                                    manufacturer_column = i;
-                                }
-                                else if (heuristicsColumnType.Min().heuristicValue < manufacturerHeuristic) {
-                                    // Not the first time, but this one seems more likely
-                                    manufacturerHeuristic = heuristicsColumnType.Min().heuristicValue;
-                                    manufacturer_column = i;
-                                }
-                                if (!manufacturer_row.HasValue) {
-                                    // If the row hasn't already been set, use a default
-                                    manufacturer_row = 2;
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-                catch (Exception) {
-                }
-                finally {
-                    Debug.WriteLine("Quantity Heuristic and column:");
-                    Debug.WriteLine(quantityHeuristic);
-                    Debug.WriteLine(quantity_column);
-                    Debug.WriteLine("Description Heuristic and column:");
-                    Debug.WriteLine(descriptionHeuristic);
-                    Debug.WriteLine(description_column);
-                    Debug.WriteLine("MPN Heuristic and column:");
-                    Debug.WriteLine(mpnHeuristic);
-                    Debug.WriteLine(mpn_column);
-                    Debug.WriteLine("Designator Heuristic and column:");
-                    Debug.WriteLine(designatorHeuristic);
-                    Debug.WriteLine(designator_column);
-                    Debug.WriteLine("Manufacturer Heuristic and column:");
-                    Debug.WriteLine(manufacturerHeuristic);
-                    Debug.WriteLine(manufacturer_column);
-                }
-
-                #endregion
 
                 mainApp.pbUpdate(20, frmMain.pbModeIncrement);
 
@@ -1043,6 +819,326 @@ namespace GPC_BOM {
             oWorksheet.Cells[row, column].Interior.Color = colourValue;
         }
 
+        private void basicSearch(frmMain mainApp, Excel.Application oExcel, int headerRow) {
+            #region Basic Search - Find column headers
+
+            mainApp.statusUpdate2("(Searching for column headers)");
+            Excel.Range searchRange = oExcel.get_Range(headerRow.ToString() + ":" + headerRow.ToString(), Type.Missing);
+
+            // Find Level
+            foreach (string item in Properties.Settings.Default.cLevel) {
+                Excel.Range locationFound = searchRange.Find(item);
+                if (locationFound != null) {
+                    // Once we get a match, break out of loop
+                    level_column = locationFound.Column;
+                    // Only get the data
+                    level_row = locationFound.Row + 1;
+                    break;
+                }
+            }
+
+            // Find CPN
+            foreach (string item in Properties.Settings.Default.cCPN) {
+                Excel.Range locationFound = searchRange.Find(item);
+                if (locationFound != null) {
+                    // Once we get a match, break out of loop
+                    cpn_column = locationFound.Column;
+                    cpn_row = locationFound.Row + 1;
+                }
+            }
+
+            // Find Description
+            foreach (string item in Properties.Settings.Default.cDescription) {
+                Excel.Range locationFound = searchRange.Find(item);
+                if (locationFound != null) {
+                    // Once we get a match, break out of loop
+                    description_column = locationFound.Column;
+                    description_row = locationFound.Row + 1;
+                    break;
+                }
+            }
+
+            // Find Quantity
+            foreach (string item in Properties.Settings.Default.cQuantity) {
+                Excel.Range locationFound = searchRange.Find(item);
+                if (locationFound != null) {
+                    // Once we get a match, break out of loop
+                    quantity_column = locationFound.Column;
+                    quantity_row = locationFound.Row + 1;
+                    break;
+                }
+            }
+
+            // Find Designator
+            foreach (string item in Properties.Settings.Default.cDesignator) {
+                Excel.Range locationFound = searchRange.Find(item);
+                if (locationFound != null) {
+                    // Once we get a match, break out of loop
+                    designator_column = locationFound.Column;
+                    designator_row = locationFound.Row + 1;
+                    break;
+                }
+            }
+
+            // Find Manufacturer
+            foreach (string item in Properties.Settings.Default.cManufacturer) {
+                Excel.Range locationFound = searchRange.Find(item);
+                if (locationFound != null) {
+                    // Once we get a match, break out of loop
+                    manufacturer_column = locationFound.Column;
+                    manufacturer_row = locationFound.Row + 1;
+                    break;
+                }
+            }
+
+            // Find MPN
+            foreach (string item in Properties.Settings.Default.cMPN) {
+                Excel.Range locationFound = searchRange.Find(item);
+                if (locationFound != null) {
+                    // Once we get a match, break out of loop
+                    mpn_column = locationFound.Column;
+                    mpn_row = locationFound.Row + 1;
+                    break;
+                }
+            }
+
+            // Find Process
+            foreach (string item in Properties.Settings.Default.cProcess) {
+                Excel.Range locationFound = searchRange.Find(item);
+                if (locationFound != null) {
+                    // Once we get a match, break out of loop
+                    process_column = locationFound.Column;
+                    process_row = locationFound.Row + 1;
+                    break;
+                }
+            }
+
+            // Find Notes
+            foreach (string item in Properties.Settings.Default.cNotes) {
+                Excel.Range locationFound = searchRange.Find(item);
+                if (locationFound != null) {
+                    // Once we get a match, break out of loop
+                    notes_column = locationFound.Column;
+                    notes_row = locationFound.Row + 1;
+                    break;
+                }
+            }
+
+            #endregion
+        }
+
+        private void heuristicSearch(frmMain mainApp, Excel.Application oExcel, Excel.Worksheet oWorksheet, Heuristics.Classifier heuristics_classifier, int headerRow) {
+            #region Heuristics - Find Column Headers
+
+            mainApp.statusUpdate2("(Searching for column headers intelligently)");
+
+            // Use these to store the raw lowest heuristic values
+            double? quantityHeuristic = null;
+            double? descriptionHeuristic = null;
+            double? manufacturerHeuristic = null;
+            double? mpnHeuristic = null;
+            double? designatorHeuristic = null;
+
+            try {
+                for (int i = 1; i < oWorksheet.UsedRange.Columns.Count + 1; i++) {
+                    // Copy every column sequentially into a temporary array until we find everything we're looking for
+                    Excel.Range temp_start = oWorksheet.Cells[headerRow, i];
+                    Excel.Range temp_end = oWorksheet.Cells[oWorksheet.UsedRange.Rows.Count, i];
+                    Excel.Range temp_range = (Excel.Range)oWorksheet.get_Range(temp_start, temp_end);
+                    System.Array genArray = (System.Array)temp_range.Cells.Value2;
+                    string[] tempArray = genArray.OfType<object>().Select(o => o.ToString()).ToArray();
+
+                    // Classify the current column
+                    List<Heuristics.Classifier.HeuristicTuple> heuristicsColumnType = heuristics_classifier.Classify(tempArray);
+
+                    // Determine whether a column belongs to a specific type
+                    switch (heuristicsColumnType.Min().columnType) {
+                        case Heuristics.Classifier.ColumnType.Quantity:
+                            if (!quantityHeuristic.HasValue) {
+                                // First time a column has been predicted to be 'quantity'
+                                Debug.WriteLine(heuristicsColumnType.Min().heuristicValue.ToString());
+                                quantityHeuristic = Convert.ToDouble(heuristicsColumnType.Min().heuristicValue.ToString());
+                                quantity_column = i;
+                            }
+                            else if (heuristicsColumnType.Min().heuristicValue < quantityHeuristic) {
+                                // Not the first time, but this one seems more likely
+                                quantityHeuristic = heuristicsColumnType.Min().heuristicValue;
+                                quantity_column = i;
+                            }
+                            if (!quantity_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                quantity_row = headerRow + 1;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.Description:
+                            if (!descriptionHeuristic.HasValue) {
+                                // First time a column has been predicted to be 'description'
+                                descriptionHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
+                                description_column = i;
+                            }
+                            else if (heuristicsColumnType.Min().heuristicValue < descriptionHeuristic) {
+                                // Not the first time, but this one seems more likely
+                                descriptionHeuristic = heuristicsColumnType.Min().heuristicValue;
+                                description_column = i;
+                            }
+                            if (!description_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                description_row = headerRow + 1;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.PartNumber:
+                            if (!mpnHeuristic.HasValue) {
+                                // First time a column has been predicted to be 'mpn'
+                                mpnHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
+                                mpn_column = i;
+                            }
+                            else if (heuristicsColumnType.Min().heuristicValue < mpnHeuristic) {
+                                // Not the first time, but this one seems more likely
+                                mpnHeuristic = heuristicsColumnType.Min().heuristicValue;
+                                mpn_column = i;
+                            }
+                            if (!mpn_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                mpn_row = headerRow + 1;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.Designator:
+                            if (!designatorHeuristic.HasValue) {
+                                // First time a column has been predicted to be 'designator'
+                                designatorHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
+                                designator_column = i;
+                            }
+                            else if (heuristicsColumnType.Min().heuristicValue < designatorHeuristic) {
+                                // Not the first time, but this one seems more likely
+                                designatorHeuristic = heuristicsColumnType.Min().heuristicValue;
+                                designator_column = i;
+                            }
+                            if (!designator_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                designator_row = headerRow + 1;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.Manufacturer:
+                            if (!manufacturerHeuristic.HasValue) {
+                                // First time a column has been predicted to be 'manufacturer'
+                                manufacturerHeuristic = (double)heuristicsColumnType.Min().heuristicValue;
+                                manufacturer_column = i;
+                            }
+                            else if (heuristicsColumnType.Min().heuristicValue < manufacturerHeuristic) {
+                                // Not the first time, but this one seems more likely
+                                manufacturerHeuristic = heuristicsColumnType.Min().heuristicValue;
+                                manufacturer_column = i;
+                            }
+                            if (!manufacturer_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                manufacturer_row = headerRow + 1;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            catch (Exception) {
+            }
+            finally {
+                Debug.WriteLine("Quantity Heuristic and column:");
+                Debug.WriteLine(quantityHeuristic);
+                Debug.WriteLine(quantity_column);
+                Debug.WriteLine("Description Heuristic and column:");
+                Debug.WriteLine(descriptionHeuristic);
+                Debug.WriteLine(description_column);
+                Debug.WriteLine("MPN Heuristic and column:");
+                Debug.WriteLine(mpnHeuristic);
+                Debug.WriteLine(mpn_column);
+                Debug.WriteLine("Designator Heuristic and column:");
+                Debug.WriteLine(designatorHeuristic);
+                Debug.WriteLine(designator_column);
+                Debug.WriteLine("Manufacturer Heuristic and column:");
+                Debug.WriteLine(manufacturerHeuristic);
+                Debug.WriteLine(manufacturer_column);
+            }
+
+            #endregion
+        }
+
+        private void heuristicSearch2(frmMain mainApp, Excel.Application oExcel, Excel.Worksheet oWorksheet, Heuristics.Classifier heuristics_classifier, int headerRow) {
+            #region Heuristics - Find Column Headers with kNN method
+
+            mainApp.statusUpdate2("(Searching for column headers intelligently)");
+
+            try {
+                for (int i = 1; i < oWorksheet.UsedRange.Columns.Count + 1; i++) {
+                    // Copy every column sequentially into a temporary array until we find everything we're looking for
+                    Excel.Range temp_start = oWorksheet.Cells[headerRow, i];
+                    Excel.Range temp_end = oWorksheet.Cells[oWorksheet.UsedRange.Rows.Count, i];
+                    Excel.Range temp_range = (Excel.Range)oWorksheet.get_Range(temp_start, temp_end);
+                    System.Array genArray = (System.Array)temp_range.Cells.Value2;
+                    string[] tempArray = genArray.OfType<object>().Select(o => o.ToString()).ToArray();
+
+                    // Classify the current column
+                    Heuristics.Classifier.ColumnType heuristicsColumnType = heuristics_classifier.Classify_KNN(tempArray, 5);
+
+                    // Determine whether a column belongs to a specific type
+                    switch (heuristicsColumnType) {
+                        case Heuristics.Classifier.ColumnType.Quantity:
+                            quantity_column = i;
+                            if (!quantity_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                quantity_row = headerRow + 1;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.Description:
+                            description_column = i;
+                            if (!description_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                description_row = headerRow + 1;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.PartNumber:
+                            mpn_column = i;
+                            if (!mpn_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                mpn_row = headerRow + 1;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.Designator:
+                            designator_column = i;
+                            if (!designator_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                designator_row = headerRow + 1;
+                            }
+                            break;
+                        case Heuristics.Classifier.ColumnType.Manufacturer:
+                            manufacturer_column = i;
+                            if (!manufacturer_row.HasValue) {
+                                // If the row hasn't already been set, use a default
+                                manufacturer_row = headerRow + 1;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            catch (Exception) {
+            }
+            finally {
+                Debug.WriteLine("Quantity column:");
+                Debug.WriteLine(quantity_column);
+                Debug.WriteLine("Description column:");
+                Debug.WriteLine(description_column);
+                Debug.WriteLine("MPN column:");
+                Debug.WriteLine(mpn_column);
+                Debug.WriteLine("Designator column:");
+                Debug.WriteLine(designator_column);
+                Debug.WriteLine("Manufacturer column:");
+                Debug.WriteLine(manufacturer_column);
+            }
+
+            #endregion
+        }
+
         public static bool CheckForInternetConnection() {
             // https://stackoverflow.com/a/2031831/2553699
             try {
@@ -1076,20 +1172,20 @@ namespace GPC_BOM {
                 if (string.IsNullOrEmpty(result)) {
                     switch (webOrder[i]) {
                         case "NaiveDigikey":
-                            mainApp.statusUpdate2("(Checking for missing fields via Digikey (15s timeout))");
-                            result = NaiveDigikey(searchTerm);
+                            mainApp.statusUpdate2("(Checking for missing fields via Digikey)");
+                            result = NaiveDigikey(searchTerm).Result;
                             break;
                         case "NaiveMouser":
-                            mainApp.statusUpdate2("(Checking for missing fields via Mouser (15s timeout))");
-                            result = NaiveMouser(searchTerm);
+                            mainApp.statusUpdate2("(Checking for missing fields via Mouser)");
+                            result = NaiveMouser(searchTerm).Result;
                             break;
                         case "NaiveElement14":
-                            mainApp.statusUpdate2("(Checking for missing fields via Element14 (15s timeout))");
-                            result = NaiveElement14(searchTerm);
+                            mainApp.statusUpdate2("(Checking for missing fields via Element14)");
+                            result = NaiveElement14(searchTerm).Result;
                             break;
                         case "NaiveRS":
-                            mainApp.statusUpdate2("(Checking for missing fields via RS Components (15s timeout))");
-                            result = NaiveRS(searchTerm);
+                            mainApp.statusUpdate2("(Checking for missing fields via RS Components)");
+                            result = NaiveRS(searchTerm).Result;
                             break;
                     }
                 }
@@ -1100,41 +1196,53 @@ namespace GPC_BOM {
             return result;
         }
 
-        private string NaiveDigikey(string searchTerm) {
+        private async Task<string> NaiveDigikey(string searchTerm) {
             string retVal = "";
-            var task = Task.Run(() => Webscraper.NaiveDigikey(searchTerm));
-            if (task.Wait(TimeSpan.FromSeconds(15)))
+            int timeout = (int)Properties.Settings.Default.webTimeout * 1000;
+            var task = Webscraper.NaiveDigikey(searchTerm);
+            if (await Task.WhenAny(task, Task.Delay(timeout)) == task) {
                 return task.Result.ToString();
-            else
+            }
+            else {
                 Debug.WriteLine("Digikey timed out.");
-                return retVal;            
+                return retVal;
+            }       
         }
-        private string NaiveMouser(string searchTerm) {
+        private async Task<string> NaiveMouser(string searchTerm) {
             string retVal = "";
-            var task = Task.Run(() => Webscraper.NaiveMouser(searchTerm));
-            if (task.Wait(TimeSpan.FromSeconds(15)))
+            int timeout = (int)Properties.Settings.Default.webTimeout * 1000;
+            var task = Webscraper.NaiveMouser(searchTerm);
+            if (await Task.WhenAny(task, Task.Delay(timeout)) == task) {
                 return task.Result.ToString();
-            else
+            }
+            else {
                 Debug.WriteLine("Mouser timed out.");
-            return retVal;            
+                return retVal;
+            }       
         }
-        private string NaiveElement14(string searchTerm) {
+        private async Task<string> NaiveElement14(string searchTerm) {
             string retVal = "";
-            var task = Task.Run(() => Webscraper.NaiveElement14(searchTerm));
-            if (task.Wait(TimeSpan.FromSeconds(15)))
+            int timeout = (int)Properties.Settings.Default.webTimeout * 1000;
+            var task = Webscraper.NaiveElement14(searchTerm);
+            if (await Task.WhenAny(task, Task.Delay(timeout)) == task) {
                 return task.Result.ToString();
-            else
+            }
+            else {
                 Debug.WriteLine("Element14 timed out.");
-            return retVal;            
+                return retVal;
+            }             
         }
-        private string NaiveRS(string searchTerm) {
+        private async Task<string> NaiveRS(string searchTerm) {
             string retVal = "";
-            var task = Task.Run(() => Webscraper.NaiveRS(searchTerm));
-            if (task.Wait(TimeSpan.FromSeconds(15)))
+            int timeout = (int)Properties.Settings.Default.webTimeout * 1000;
+            var task = Webscraper.NaiveRS(searchTerm);
+            if (await Task.WhenAny(task, Task.Delay(timeout)) == task) {
                 return task.Result.ToString();
-            else
+            }
+            else {
                 Debug.WriteLine("RS Components timed out.");
-            return retVal;            
+                return retVal;
+            }                
         }
     }
 }

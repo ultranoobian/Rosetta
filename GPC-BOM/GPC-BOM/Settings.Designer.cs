@@ -54,12 +54,19 @@
             this.numElement14 = new System.Windows.Forms.NumericUpDown();
             this.numDigikey = new System.Windows.Forms.NumericUpDown();
             this.btnDefault = new System.Windows.Forms.Button();
+            this.gbColumnSearching = new System.Windows.Forms.GroupBox();
+            this.cbPreferredMode = new System.Windows.Forms.ComboBox();
+            this.lblPreferred = new System.Windows.Forms.Label();
+            this.lblTimeout = new System.Windows.Forms.Label();
+            this.numWebTimeout = new System.Windows.Forms.NumericUpDown();
             this.gbColumns.SuspendLayout();
             this.gbWebScrapers.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numMouser)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numRS)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numElement14)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numDigikey)).BeginInit();
+            this.gbColumnSearching.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numWebTimeout)).BeginInit();
             this.SuspendLayout();
             // 
             // tbLevel
@@ -255,7 +262,7 @@
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(397, 427);
+            this.btnSave.Location = new System.Drawing.Point(397, 527);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 2;
@@ -265,6 +272,8 @@
             // 
             // gbWebScrapers
             // 
+            this.gbWebScrapers.Controls.Add(this.numWebTimeout);
+            this.gbWebScrapers.Controls.Add(this.lblTimeout);
             this.gbWebScrapers.Controls.Add(this.lblElement14);
             this.gbWebScrapers.Controls.Add(this.lblRS);
             this.gbWebScrapers.Controls.Add(this.lblMouser);
@@ -275,7 +284,7 @@
             this.gbWebScrapers.Controls.Add(this.numDigikey);
             this.gbWebScrapers.Location = new System.Drawing.Point(12, 330);
             this.gbWebScrapers.Name = "gbWebScrapers";
-            this.gbWebScrapers.Size = new System.Drawing.Size(460, 91);
+            this.gbWebScrapers.Size = new System.Drawing.Size(460, 131);
             this.gbWebScrapers.TabIndex = 3;
             this.gbWebScrapers.TabStop = false;
             this.gbWebScrapers.Text = "Web Scraping Preference";
@@ -406,7 +415,7 @@
             // 
             // btnDefault
             // 
-            this.btnDefault.Location = new System.Drawing.Point(12, 427);
+            this.btnDefault.Location = new System.Drawing.Point(12, 527);
             this.btnDefault.Name = "btnDefault";
             this.btnDefault.Size = new System.Drawing.Size(100, 23);
             this.btnDefault.TabIndex = 4;
@@ -414,11 +423,72 @@
             this.btnDefault.UseVisualStyleBackColor = true;
             this.btnDefault.Click += new System.EventHandler(this.btnDefault_Click);
             // 
+            // gbColumnSearching
+            // 
+            this.gbColumnSearching.Controls.Add(this.lblPreferred);
+            this.gbColumnSearching.Controls.Add(this.cbPreferredMode);
+            this.gbColumnSearching.Location = new System.Drawing.Point(12, 467);
+            this.gbColumnSearching.Name = "gbColumnSearching";
+            this.gbColumnSearching.Size = new System.Drawing.Size(460, 54);
+            this.gbColumnSearching.TabIndex = 5;
+            this.gbColumnSearching.TabStop = false;
+            this.gbColumnSearching.Text = "Searching Parameters";
+            // 
+            // cbPreferredMode
+            // 
+            this.cbPreferredMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbPreferredMode.FormattingEnabled = true;
+            this.cbPreferredMode.Items.AddRange(new object[] {
+            "Basic Excel search based on Column Identifiers",
+            "Intelligent Heuristic Classification (Type 1)",
+            "Intelligent Heuristic Classification (Type 2)"});
+            this.cbPreferredMode.Location = new System.Drawing.Point(159, 19);
+            this.cbPreferredMode.MaxDropDownItems = 2;
+            this.cbPreferredMode.Name = "cbPreferredMode";
+            this.cbPreferredMode.Size = new System.Drawing.Size(295, 21);
+            this.cbPreferredMode.TabIndex = 0;
+            // 
+            // lblPreferred
+            // 
+            this.lblPreferred.AutoSize = true;
+            this.lblPreferred.Location = new System.Drawing.Point(6, 22);
+            this.lblPreferred.Name = "lblPreferred";
+            this.lblPreferred.Size = new System.Drawing.Size(147, 13);
+            this.lblPreferred.TabIndex = 1;
+            this.lblPreferred.Text = "Preferred Search Mechanism:";
+            // 
+            // lblTimeout
+            // 
+            this.lblTimeout.AutoSize = true;
+            this.lblTimeout.Location = new System.Drawing.Point(6, 86);
+            this.lblTimeout.Name = "lblTimeout";
+            this.lblTimeout.Size = new System.Drawing.Size(179, 13);
+            this.lblTimeout.TabIndex = 2;
+            this.lblTimeout.Text = "Web Scraping Timeout (in seconds):";
+            // 
+            // numWebTimeout
+            // 
+            this.numWebTimeout.Location = new System.Drawing.Point(205, 84);
+            this.numWebTimeout.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.numWebTimeout.Name = "numWebTimeout";
+            this.numWebTimeout.Size = new System.Drawing.Size(97, 20);
+            this.numWebTimeout.TabIndex = 8;
+            this.numWebTimeout.Value = new decimal(new int[] {
+            15,
+            0,
+            0,
+            0});
+            // 
             // Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 462);
+            this.ClientSize = new System.Drawing.Size(484, 562);
+            this.Controls.Add(this.gbColumnSearching);
             this.Controls.Add(this.btnDefault);
             this.Controls.Add(this.gbWebScrapers);
             this.Controls.Add(this.btnSave);
@@ -433,6 +503,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.numRS)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numElement14)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numDigikey)).EndInit();
+            this.gbColumnSearching.ResumeLayout(false);
+            this.gbColumnSearching.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numWebTimeout)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -470,6 +543,11 @@
         private System.Windows.Forms.NumericUpDown numRS;
         private System.Windows.Forms.NumericUpDown numElement14;
         private System.Windows.Forms.Button btnDefault;
+        private System.Windows.Forms.GroupBox gbColumnSearching;
+        private System.Windows.Forms.Label lblPreferred;
+        private System.Windows.Forms.ComboBox cbPreferredMode;
+        private System.Windows.Forms.NumericUpDown numWebTimeout;
+        private System.Windows.Forms.Label lblTimeout;
 
 
     }

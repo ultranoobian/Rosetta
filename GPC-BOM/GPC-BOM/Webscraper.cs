@@ -10,7 +10,7 @@ using System.Net;
 namespace GPC_BOM {
     public static class Webscraper {
 
-        public static string NaiveDigikey(string keyword) {
+        public async static Task<string> NaiveDigikey(string keyword) {
             try {
                 // Important to safely dispose of resources
                 // WebBrowser is memory intensive
@@ -51,7 +51,7 @@ namespace GPC_BOM {
             return "";
         }
 
-        public static string NaiveRS(string keyword) {
+        public async static Task<string> NaiveRS(string keyword) {
             try {
                 // Important to safely dispose of resources
                 // WebBrowser is memory intensive
@@ -105,7 +105,7 @@ namespace GPC_BOM {
             return "";
         }
 
-        public static string NaiveElement14(string keyword) {
+        public async static Task<string> NaiveElement14(string keyword) {
             try {
                 // Important to safely dispose of resources
                 // WebBrowser is memory intensive
@@ -148,7 +148,7 @@ namespace GPC_BOM {
             return "";
         }
 
-        public static string NaiveMouser(string keyword) {
+        public async static Task<string> NaiveMouser(string keyword) {
             try {
                 // Important to safely dispose of resources
                 // WebBrowser is memory intensive

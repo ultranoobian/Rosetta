@@ -110,7 +110,7 @@
       <Value Profile="(Default)">NaiveRS</Value>
     </Setting>
     <Setting Name="webTimeout" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">15</Value>
+      <Value Profile="(Default)">10</Value>
     </Setting>
     <Setting Name="preferredSearchType" Type="System.String" Scope="User">
       <Value Profile="(Default)">Heuristic2</Value>

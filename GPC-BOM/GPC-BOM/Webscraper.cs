@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http;
+using System.Xml;
 
 namespace GPC_BOM {
     public static class Webscraper {
@@ -199,5 +201,74 @@ namespace GPC_BOM {
             return "";
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keyword">Part Number to search for</param>
+        /// <returns>First product description, otherwise empty string.</returns>
+        public static string MouserAPI_GetDescription(string keyword)
+        {
+            try
+            {
+                if (keyword.Trim().Length > 0)
+                {
+                    Mouser.AccountInfo ai = new Mouser.AccountInfo
+                    {
+                        PartnerID = "3974f08f-de2e-403c-89f8-f7a0669a5e3f"
+                    };
+                    Mouser.MouserHeader mh = new Mouser.MouserHeader
+                    {
+                        AccountInfo = ai
+                    };
+                    var sap = new Mouser.SearchAPISoapClient("SearchAPISoap");
+
+                    Mouser.ResultParts results = sap.SearchByPartNumber(mh, keyword, "2");
+                    if (results.Parts.Length > 0)
+                    {
+                        return results.Parts[0].Description;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
+            return "";
+        }
+
+        public static string Element14API_GetDescription(string keyword)
+        {
+            //Construct our URI with our parameters
+            UriBuilder uriBuilder = new UriBuilder("https://api.element14.com/catalog/products");
+            string[] apiParams = new string[] {
+                "callInfo.responseDataFormat=XML",
+                "callInfo.omitXmlSchema",
+                "term=manuPartNum:"+keyword+"",
+                "storeInfo.id=au.element14.com",
+                "callInfo.apiKey=h3vmjutcu9kfq6xuhfybs8nv",
+            };
+
+            uriBuilder.Query = String.Join("&", apiParams);
+
+            // Use HttpClient to access our prebuilt URI
+            HttpClient hc = new HttpClient();
+            hc.BaseAddress = uriBuilder.Uri;
+            string v = hc.GetStringAsync("").Result;
+
+            // Load HTTP Response into XML Document Object
+            XmlDocument xDoc = new XmlDocument();
+            xDoc.LoadXml(v);
+
+            // Test number of products in XML Document, return the first item description, otherwise nothing.
+            int count = int.Parse(xDoc.GetElementsByTagName("ns1:numberOfResults")[0].InnerText);
+            if(count > 0)
+            {
+                return xDoc.GetElementsByTagName("ns1:displayName")[0].InnerText;
+            } else
+            {
+                return "";
+            }         
+        }
     }
 }

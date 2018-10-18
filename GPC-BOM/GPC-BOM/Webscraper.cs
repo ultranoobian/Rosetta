@@ -108,6 +108,7 @@ namespace GPC_BOM {
         }
 
         public async static Task<string> NaiveElement14(string keyword) {
+            return Element14API_GetDescription(keyword);
             try {
                 // Important to safely dispose of resources
                 // WebBrowser is memory intensive
@@ -151,6 +152,7 @@ namespace GPC_BOM {
         }
 
         public async static Task<string> NaiveMouser(string keyword) {
+            return MouserAPI_GetDescription(keyword);
             try {
                 // Important to safely dispose of resources
                 // WebBrowser is memory intensive

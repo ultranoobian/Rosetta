@@ -1169,28 +1169,33 @@ namespace GPC_BOM {
             webOrder.Add(Properties.Settings.Default.webOrder3);
             webOrder.Add(Properties.Settings.Default.webOrder4);
             for (int i = 0; i < webOrder.Count; i++) {
-                if (string.IsNullOrEmpty(result)) {
-                    switch (webOrder[i]) {
-                        case "NaiveDigikey":
-                            mainApp.statusUpdate2("(Checking for missing fields via Digikey)");
-                            result = NaiveDigikey(searchTerm).Result;
-                            break;
-                        case "NaiveMouser":
-                            mainApp.statusUpdate2("(Checking for missing fields via Mouser)");
-                            result = NaiveMouser(searchTerm).Result;
-                            break;
-                        case "NaiveElement14":
-                            mainApp.statusUpdate2("(Checking for missing fields via Element14)");
-                            result = NaiveElement14(searchTerm).Result;
-                            break;
-                        case "NaiveRS":
-                            mainApp.statusUpdate2("(Checking for missing fields via RS Components)");
-                            result = NaiveRS(searchTerm).Result;
-                            break;
+                try {
+                    if (string.IsNullOrEmpty(result)) {
+                        switch (webOrder[i]) {
+                            case "NaiveDigikey":
+                                mainApp.statusUpdate2("(Checking for missing fields via Digikey)");
+                                result = NaiveDigikey(searchTerm).Result;
+                                break;
+                            case "NaiveMouser":
+                                mainApp.statusUpdate2("(Checking for missing fields via Mouser)");
+                                result = NaiveMouser(searchTerm).Result;
+                                break;
+                            case "NaiveElement14":
+                                mainApp.statusUpdate2("(Checking for missing fields via Element14)");
+                                result = NaiveElement14(searchTerm).Result;
+                                break;
+                            case "NaiveRS":
+                                mainApp.statusUpdate2("(Checking for missing fields via RS Components)");
+                                result = NaiveRS(searchTerm).Result;
+                                break;
+                        }
+                    }
+                    else {
+                        break;
                     }
                 }
-                else {
-                    break;
+                catch (Exception) {
+                    continue;
                 }
             }
             return result;

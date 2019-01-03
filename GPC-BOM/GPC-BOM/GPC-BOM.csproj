@@ -111,6 +111,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
+    <Compile Include="DigiKeyOAuth.cs" />
     <Compile Include="ExcelConversion.cs" />
     <Compile Include="Heuristics\CharacterFrequencyAnalyzer.cs" />
     <Compile Include="Heuristics\Classifier.cs" />

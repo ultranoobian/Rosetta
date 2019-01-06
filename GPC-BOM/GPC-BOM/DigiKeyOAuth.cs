@@ -15,14 +15,16 @@ namespace GPC_BOM
     ///  Adapted from: OAuth for Apps: Samples for Windows
     ///  By: googlesamples
     ///  At:  https://github.com/googlesamples/oauth-apps-for-windows
+    ///  
+    ///  Adapted from: https://stackoverflow.com/questions/11403333/httplistener-with-https-support
     /// </summary>
-    class DigiKeyOAuth
+    public class DigiKeyOAuth
     {
         const string clientID = "a78ec1fe-e228-4f68-ae31-10aaf4e3104a";
         const string clientSecret = ""; // Not going to put secret here
         const string authEndPoint = "https://sso.digikey.com/as/authorization.oauth2";
         const string tokenEndPoint = "https://sso.digikey.com/as/token.oauth2";
-        const string redirectURI = "https://localhost:443/callback/";
+        const string redirectURI = "https://127.0.0.1:55555/";
 
         public async void authProcess()
         {
@@ -46,6 +48,10 @@ namespace GPC_BOM
 
             // Sends an HTTP response to the browser.
             var response = context.Response;
+
+            // #hints towards auth code
+            var url = context.Request.Url;
+
             string responseString = string.Format("<html><head><meta http-equiv='refresh' content='10;url=https://google.com'></head><body>Please return to the app.</body></html>");
             var buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
             response.ContentLength64 = buffer.Length;

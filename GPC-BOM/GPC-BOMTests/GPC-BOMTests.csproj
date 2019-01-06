@@ -55,6 +55,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="DigiKeyOAuth_Test.cs" />
     <Compile Include="Heuristics\CharacterFrequencyAnalyzerTests.cs" />
     <Compile Include="Heuristics\ClassifierTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
